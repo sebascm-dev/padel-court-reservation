@@ -1,9 +1,12 @@
 "use client"
-import Image from 'next/image';
 import { useState, FormEvent } from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
+    const router = useRouter();
     const [formData, setFormData] = useState({
         nombre: '',
         apellidos: '',
@@ -16,11 +19,75 @@ export default function RegisterPage() {
         password: '',
         confirmPassword: ''
     });
+    const [registrationComplete, setRegistrationComplete] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log('Datos del formulario:', formData);
+        setLoading(true);
+
+        try {
+            if (formData.password !== formData.confirmPassword) {
+                throw new Error('Las contraseñas no coinciden');
+            }
+
+            const { data, error } = await supabase.auth.signUp({
+                email: formData.email,
+                password: formData.password,
+                options: {
+                    emailRedirectTo: `${window.location.origin}/auth/callback`
+                }
+            });
+
+            if (error) throw error;
+
+            // 2. Insertar datos del perfil
+            const { error: profileError } = await supabase
+                .from('usuarios')
+                .insert({
+                    id: data.user?.id,
+                    nombre: formData.nombre,
+                    apellidos: formData.apellidos,
+                    telefono: formData.telefono,
+                    fecha_nacimiento: formData.fechaNacimiento,
+                    sexo: formData.sexo,
+                    nivel: parseInt(formData.nivel),
+                    localidad: formData.localidad,
+                });
+
+            if (profileError) throw profileError;
+
+            setRegistrationComplete(true);
+
+        } catch (error: any) {
+            console.error('Error durante el registro:', error);
+            alert(error.message || 'Error durante el registro');
+        } finally {
+            setLoading(false);
+        }
     };
+
+    if (registrationComplete) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="max-w-md w-full space-y-8 p-6 bg-white rounded-xl shadow-lg">
+                    <div className="text-center">
+                        <h2 className="text-2xl font-bold text-gray-900">¡Registro completado!</h2>
+                        <p className="mt-2 text-gray-600">
+                            Te hemos enviado un email de confirmación.
+                            Por favor, revisa tu bandeja de entrada y sigue las instrucciones.
+                        </p>
+                        <button
+                            onClick={() => router.push('/login')}
+                            className="mt-4 bg-primary text-white px-4 py-2 rounded-lg"
+                        >
+                            Ir al inicio de sesión
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen relative">
@@ -199,8 +266,9 @@ export default function RegisterPage() {
                             <button 
                                 type="submit"
                                 className="bg-primary text-white px-4 py-3 mt-6 rounded-lg font-medium text-sm hover:bg-primary/75 hover:cursor-pointer transition-all ease-in duration-200"
+                                disabled={loading}
                             >
-                                Crear cuenta
+                                {loading ? 'Cargando...' : 'Crear cuenta'}
                             </button>
                             <p className='text-sm text-primary/40 -mt-3 flex justify-center items-center'>
                                 ¿Ya tienes cuenta? <a href="/login" className="ml-1 text-primary hover:underline">Inicia sesión</a>
