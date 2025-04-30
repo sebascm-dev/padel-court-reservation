@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -26,11 +27,15 @@ export default function RegisterPage() {
         e.preventDefault();
         setLoading(true);
 
-        try {
-            if (formData.password !== formData.confirmPassword) {
-                throw new Error('Las contraseñas no coinciden');
-            }
+        if (formData.password !== formData.confirmPassword) {
+            toast.error('Las contraseñas no coinciden');
+            setLoading(false);
+            return;
+        }
 
+        const loadingToast = toast.loading('Creando tu cuenta...');
+
+        try {
             const { data, error } = await supabase.auth.signUp({
                 email: formData.email,
                 password: formData.password,
@@ -41,7 +46,6 @@ export default function RegisterPage() {
 
             if (error) throw error;
 
-            // 2. Insertar datos del perfil
             const { error: profileError } = await supabase
                 .from('usuarios')
                 .insert({
@@ -57,11 +61,20 @@ export default function RegisterPage() {
 
             if (profileError) throw profileError;
 
+            toast.dismiss(loadingToast);
+            toast.success('¡Registro completado! Por favor, verifica tu email.');
             setRegistrationComplete(true);
 
         } catch (error: any) {
+            toast.dismiss(loadingToast);
             console.error('Error durante el registro:', error);
-            alert(error.message || 'Error durante el registro');
+            if (error.message.includes('already registered')) {
+                toast.error('Este email ya está registrado');
+            } else if (error.message.includes('weak-password')) {
+                toast.error('La contraseña es demasiado débil');
+            } else {
+                toast.error('Error durante el registro');
+            }
         } finally {
             setLoading(false);
         }
