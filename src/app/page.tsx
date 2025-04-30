@@ -1,18 +1,24 @@
-import Image from "next/image";
+"use client"
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
-export default function Home() {
-  return (
-    <>
-      <main className="
-      mx-auto max-w-6xl bg-opacity-0
-      lg:p-4 lg:mt-28 lg:w-[85%]
-      md:p-4 md:mt-20 md:w-[85%]
-      mt-16 w-[90%]
-      ">
+export default function Dashboard() {
+    const router = useRouter();
 
-        <h1>Dashboard</h1>
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.push('/login');
+    };
 
-      </main>
-    </>
-  );
+    return (
+        <div className="p-4">
+            <h1>Dashboard</h1>
+            <button 
+                onClick={handleLogout}
+                className="bg-red-500 text-white px-4 py-2 rounded"
+            >
+                Cerrar sesión
+            </button>
+        </div>
+    );
 }
