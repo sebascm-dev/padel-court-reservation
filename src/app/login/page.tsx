@@ -3,17 +3,38 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState, FormEvent } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 export default function LoginPage() {
+    const router = useRouter();
+    const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
         password: ''
     });
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Aquí irá la lógica de autenticación
-        console.log('Datos del formulario:', formData);
+        setLoading(true);
+
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: formData.email,
+                password: formData.password,
+            });
+
+            if (error) throw error;
+
+            // Redirigir al usuario a la página principal
+            router.push('/');
+            router.refresh();
+
+        } catch (error: any) {
+            alert(error.message || 'Error al iniciar sesión');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -117,9 +138,10 @@ export default function LoginPage() {
 
                             <button 
                                 type="submit"
-                                className="bg-primary text-white px-4 py-3 rounded-lg font-medium text-sm hover:bg-primary/75 hover:cursor-pointer transition-all ease-in duration-200"
+                                disabled={loading}
+                                className="bg-primary text-white px-4 py-3 rounded-lg font-medium text-sm hover:bg-primary/75 hover:cursor-pointer transition-all ease-in duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Iniciar Sesión
+                                {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                             </button>
                             <p className='text-sm text-primary/40 -mt-3 flex justify-center items-center'>
                                 ¿No tienes cuenta? <a href="/register" className="ml-1 text-primary hover:underline">Registrarse</a>
