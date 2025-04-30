@@ -5,6 +5,7 @@ import { useState, FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -17,6 +18,8 @@ export default function LoginPage() {
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
+        
+        const loadingToast = toast.loading('Iniciando sesión...');
 
         try {
             const { data, error } = await supabase.auth.signInWithPassword({
@@ -26,12 +29,18 @@ export default function LoginPage() {
 
             if (error) throw error;
 
-            // Redirigir al usuario a la página principal
+            toast.dismiss(loadingToast);
+            toast.success('¡Sesión iniciada correctamente!');
             router.push('/');
             router.refresh();
 
         } catch (error: any) {
-            alert(error.message || 'Error al iniciar sesión');
+            toast.dismiss(loadingToast);
+            if (error.message === 'Invalid login credentials') {
+                toast.error('Credenciales incorrectas');
+            } else {
+                toast.error('Error al iniciar sesión');
+            }
         } finally {
             setLoading(false);
         }
