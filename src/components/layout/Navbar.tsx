@@ -30,7 +30,13 @@ const Navbar = () => {
         };
     }, []);
 
+    const handleNavigation = (path: string) => {
+        setIsOpen(false);
+        router.push(path);
+    };
+
     const handleLogout = async () => {
+        setIsOpen(false);
         await supabase.auth.signOut();
         router.push('/login');
     };
@@ -98,6 +104,33 @@ const Navbar = () => {
                         variants={menuVariants}
                         className="fixed top-0 right-0 h-full w-64 bg-white shadow-lg z-50"
                     >
+                        {/* Botón de cierre */}
+                        <motion.button
+                            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => setIsOpen(false)}
+                            initial={{ opacity: 0, rotate: -90 }}
+                            animate={{ opacity: 1, rotate: 0 }}
+                            exit={{ opacity: 0, rotate: 90 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <div className="relative w-6 h-6">
+                                <motion.span
+                                    className="absolute top-1/2 left-0 w-full h-0.5 bg-black block"
+                                    style={{ y: "-50%" }}
+                                    initial={{ rotate: 0 }}
+                                    animate={{ rotate: 45 }}
+                                />
+                                <motion.span
+                                    className="absolute top-1/2 left-0 w-full h-0.5 bg-black block"
+                                    style={{ y: "-50%" }}
+                                    initial={{ rotate: 0 }}
+                                    animate={{ rotate: -45 }}
+                                />
+                            </div>
+                        </motion.button>
+
                         <div className="p-6 flex flex-col gap-6">
                             {/* Logo */}
                             <div className="flex justify-center mb-6">
@@ -105,15 +138,21 @@ const Navbar = () => {
                             </div>
 
                             {/* Enlaces del menú */}
-                            <Link href="/" className="text-lg hover:text-blue-600 transition-colors">
+                            <button 
+                                onClick={() => handleNavigation('/')}
+                                className="text-left text-lg hover:text-blue-600 transition-colors"
+                            >
                                 Inicio
-                            </Link>
-                            <Link href="/profile" className="text-lg hover:text-blue-600 transition-colors">
+                            </button>
+                            <button 
+                                onClick={() => handleNavigation('/profile')}
+                                className="text-left text-lg hover:text-blue-600 transition-colors"
+                            >
                                 Perfil
-                            </Link>
+                            </button>
                             <button
                                 onClick={handleLogout}
-                                className="text-lg text-red-500 hover:text-red-600 transition-colors text-left"
+                                className="text-left text-lg text-red-500 hover:text-red-600 transition-colors"
                             >
                                 Cerrar sesión
                             </button>
