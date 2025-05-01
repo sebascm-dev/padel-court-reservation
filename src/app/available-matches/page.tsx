@@ -48,8 +48,13 @@ export default function AvailableMatchesPage() {
 
     const fetchReservations = async () => {
         try {
-            const today = new Date();
-            const localDateString = getLocalISOString(today);
+            const now = new Date();
+            const today = getLocalISOString(now);
+            const currentTime = now.toLocaleTimeString('es-ES', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
 
             const { data: reservationsData, error: reservationsError } = await supabase
                 .from('reservations')
@@ -63,13 +68,24 @@ export default function AvailableMatchesPage() {
                     )
                 `)
                 .eq('is_private', false)
-                .gte('date', localDateString);
+                .gte('date', today) // Solo fechas desde hoy
+                .order('date', { ascending: true }) // Ordenar por fecha ascendente
+                .order('start_time', { ascending: true }); // Ordenar por hora ascendente
 
             if (reservationsError) throw reservationsError;
 
             if (reservationsData) {
+                // Filtrar las reservas del día actual que ya han pasado
+                const filteredReservations = reservationsData.filter(reservation => {
+                    if (reservation.date > today) return true;
+                    if (reservation.date === today) {
+                        return reservation.start_time > currentTime;
+                    }
+                    return false;
+                });
+
                 const reservationsWithPlayers = await Promise.all(
-                    reservationsData.map(async (reservation) => {
+                    filteredReservations.map(async (reservation) => {
                         const { data: players, error: playersError } = await supabase
                             .from('reservation_players')
                             .select(`
