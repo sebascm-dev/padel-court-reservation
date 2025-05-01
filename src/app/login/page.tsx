@@ -1,6 +1,5 @@
 "use client"
 import Image from 'next/image';
-import Link from 'next/link';
 import { useState, FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';

@@ -1,7 +1,7 @@
 "use client"
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/components/AuthProvider';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { useEffect } from 'react';
 
 export default function Dashboard() {
