@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import LocalidadAutocomplete from '@/components/ui/LocalidadAutocomplete';
+import { getNivelDescription } from '@/utils/nivelPadel';
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -225,16 +226,20 @@ export default function RegisterPage() {
 
                                 <div className="flex flex-col gap-2">
                                     <label htmlFor="nivel" className="text-sm text-gray-600">Nivel (1-10)</label>
-                                    <input
-                                        type="range"
-                                        id="nivel"
-                                        min="1"
-                                        max="10"
-                                        className="px-4 py-2"
-                                        value={formData.nivel}
-                                        onChange={(e) => setFormData({...formData, nivel: e.target.value})}
-                                    />
-                                    <span className="text-center text-sm text-gray-600">Nivel: {formData.nivel}</span>
+                                    <div className="flex flex-col gap-1">
+                                        <input
+                                            type="range"
+                                            id="nivel"
+                                            min="1"
+                                            max="10"
+                                            className="px-4 py-2"
+                                            value={formData.nivel}
+                                            onChange={(e) => setFormData({...formData, nivel: e.target.value})}
+                                        />
+                                        <span className="text-center text-sm text-gray-600">
+                                            Nivel: {getNivelDescription(formData.nivel)}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <div className="flex flex-col gap-2">

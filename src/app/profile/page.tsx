@@ -7,6 +7,7 @@ import AvatarUpload from '@/components/profile/AvatarUpload';
 import Spinner from '@/components/ui/Spinner';
 import toast from 'react-hot-toast';
 import LocalidadAutocomplete from '@/components/ui/LocalidadAutocomplete';
+import { getNivelDescription } from '@/utils/nivelPadel';
 
 interface ProfileData {
     id?: string;
@@ -193,7 +194,7 @@ export default function ProfilePage() {
                                         disabled={updating}
                                     />
                                     <span className="text-center text-sm text-gray-600">
-                                        Nivel: {profile.nivel || '5'}
+                                        Nivel: {getNivelDescription(profile.nivel)}
                                     </span>
                                 </div>
                             </div>
