@@ -6,6 +6,7 @@ import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { formatDisplayEndTime } from '@/utils/dateUtils';
+import UserAvatar from '@/components/common/UserAvatar';
 
 // Añade estas funciones de utilidad al principio del archivo, después de los imports
 const getLocalISOString = (date: Date) => {
@@ -240,11 +241,11 @@ export default function AvailableMatchesPage() {
                                                             className="relative w-14 h-14 rounded-full overflow-hidden"
                                                             title={session?.user.id === player.user_id ? "Salir del partido" : player.usuario.nombre}
                                                         >
-                                                            <img
-                                                                src={player.usuario.avatar_url || '/default-avatar.png'}
-                                                                alt={player.usuario.nombre}
-                                                                className={`w-full h-full object-cover rounded-full border-2 border-gray-200 
-                                                                         transition-all duration-300 ${session?.user.id === player.user_id ? 'opacity-50' : ''}`}
+                                                            <UserAvatar
+                                                                nombre={player.usuario.nombre}
+                                                                apellidos={player.usuario.apellidos}
+                                                                avatarUrl={player.usuario.avatar_url}
+                                                                className={session?.user.id === player.user_id ? 'opacity-50' : ''}
                                                             />
                                                             {/* Icono de papelera siempre visible para el usuario actual */}
                                                             {session?.user.id === player.user_id && (
@@ -325,11 +326,11 @@ export default function AvailableMatchesPage() {
                                                             className="relative w-14 h-14 rounded-full overflow-hidden"
                                                             title={session?.user.id === player.user_id ? "Salir del partido" : player.usuario.nombre}
                                                         >
-                                                            <img
-                                                                src={player.usuario.avatar_url || '/default-avatar.png'}
-                                                                alt={player.usuario.nombre}
-                                                                className={`w-full h-full object-cover rounded-full border-2 border-gray-200 
-                                                                         transition-all duration-300 ${session?.user.id === player.user_id ? 'opacity-50' : ''}`}
+                                                            <UserAvatar
+                                                                nombre={player.usuario.nombre}
+                                                                apellidos={player.usuario.apellidos}
+                                                                avatarUrl={player.usuario.avatar_url}
+                                                                className={session?.user.id === player.user_id ? 'opacity-50' : ''}
                                                             />
                                                             {/* Icono de papelera siempre visible para el usuario actual */}
                                                             {session?.user.id === player.user_id && (
