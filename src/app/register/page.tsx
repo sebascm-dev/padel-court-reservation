@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import LocalidadAutocomplete from '@/components/ui/LocalidadAutocomplete';
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -238,14 +239,10 @@ export default function RegisterPage() {
 
                                 <div className="flex flex-col gap-2">
                                     <label htmlFor="localidad" className="text-sm text-gray-600">Localidad</label>
-                                    <input
-                                        type="text"
-                                        id="localidad"
-                                        required
-                                        placeholder="Tu localidad"
-                                        className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    <LocalidadAutocomplete
                                         value={formData.localidad}
-                                        onChange={(e) => setFormData({...formData, localidad: e.target.value})}
+                                        onChange={(value) => setFormData({...formData, localidad: value})}
+                                        disabled={loading}
                                     />
                                 </div>
 

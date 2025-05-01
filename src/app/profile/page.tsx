@@ -6,6 +6,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import AvatarUpload from '@/components/profile/AvatarUpload';
 import Spinner from '@/components/ui/Spinner';
 import toast from 'react-hot-toast';
+import LocalidadAutocomplete from '@/components/ui/LocalidadAutocomplete';
 
 interface ProfileData {
     id?: string;
@@ -199,13 +200,9 @@ export default function ProfilePage() {
 
                             <div className="flex flex-col gap-2">
                                 <label htmlFor="localidad" className="text-sm text-gray-600">Localidad</label>
-                                <input
-                                    type="text"
-                                    id="localidad"
-                                    placeholder="Tu localidad"
-                                    className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                <LocalidadAutocomplete
                                     value={profile.localidad || ''}
-                                    onChange={(e) => setProfile({...profile, localidad: e.target.value})}
+                                    onChange={(value) => setProfile({...profile, localidad: value})}
                                     disabled={updating}
                                 />
                             </div>
