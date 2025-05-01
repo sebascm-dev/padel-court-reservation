@@ -201,9 +201,17 @@ export default function AvailableMatchesPage() {
                             {/* Encabezado con fecha y hora */}
                             <div className="flex justify-between items-start mb-4">
                                 <h3 className="font-semibold text-lg">
-                                    {format(new Date(`${reservation.date}T00:00:00`), 'EEEE d \'de\' MMMM', { 
+                                    {format(new Date(`${reservation.date}T00:00:00`), "EEEE, d 'de' MMMM", { 
                                         locale: es 
-                                    })}
+                                    })
+                                    .split(' ')
+                                    .map((word, index) => 
+                                        // Capitalizamos el día de la semana (index 0) y el mes (index 3)
+                                        index === 0 || index === 3 
+                                            ? word.charAt(0).toUpperCase() + word.slice(1)
+                                            : word
+                                    )
+                                    .join(' ')}
                                 </h3>
                                 <span className="text-lg font-medium">
                                     {reservation.start_time.slice(0, 5)}
