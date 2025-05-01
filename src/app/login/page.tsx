@@ -18,7 +18,7 @@ export default function LoginPage() {
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
-        
+
         const loadingToast = toast.loading('Iniciando sesión...');
 
         try {
@@ -47,8 +47,8 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen relative">
-            {/* Fondo que ocupa toda la pantalla */}
+        <div className="h-screen relative">
+            {/* Fondo que ocupa toda la pantalla (100vh) */}
             <div className='fixed inset-0'>
                 <div className='absolute inset-0 bg-black/30 backdrop-blur-sm z-10'></div>
                 <Image
@@ -61,19 +61,21 @@ export default function LoginPage() {
             </div>
 
             {/* Contenido principal */}
-            <div className="relative z-20 mx-auto max-w-6xl">
-                <header className='h-[30vh] relative overflow-hidden flex items-center justify-center'>
+            <div className="relative z-20 mx-auto max-w-6xl h-full flex flex-col">
+                {/* Header (40vh) */}
+                <header className='h-[40vh] relative overflow-hidden flex items-center justify-center'>
                     <div className='relative size-36'>
                         <Image
                             src="/images/login/favicon.webp"
                             alt="Logo de Padel Court Reservation"
                             fill
                             priority
-                            className='object-contain -mt-7.5'
+                            className='object-contain'
                         />
                     </div>
                 </header>
 
+                {/* Footer (60vh) */}
                 <motion.footer
                     initial={{ y: "100%" }}
                     animate={{ y: 0 }}
@@ -83,36 +85,11 @@ export default function LoginPage() {
                         stiffness: 180,
                         duration: 0.3
                     }}
-                    className='min-h-[75vh] relative z-10 overflow-hidden rounded-t-[2.5rem] bg-background -mt-8'
+                    className='h-[60vh] relative z-10 overflow-hidden rounded-t-[2.5rem] bg-background'
                 >
                     <div className='flex flex-col gap-4 p-6 pb-8'>
+
                         <h1 className='text-2xl text-gray-800 font-semibold mt-2 mb-1'>Inicia Sesión con:</h1>
-
-                        <button className="flex h-10 flex-row cursor-pointer text-black gap-2 items-center justify-center bg-white px-4 py-3 rounded-lg font-medium text-sm hover:bg-zinc-100 transition-all ease-in duration-200 shadow-sm">
-                            <Image
-                                src="google.svg"
-                                alt='Logo de Google'
-                                width={20}
-                                height={20}
-                                className='w-6'
-                            />
-                            <span>Continuar con Google</span>
-                        </button>
-
-                        <button className="flex h-10 flex-row cursor-pointer text-black gap-3 items-center justify-center bg-white px-4 py-3 rounded-lg font-medium text-sm hover:bg-zinc-100 transition-all ease-in duration-200 shadow-sm">
-                            <Image
-                                src="apple.svg"
-                                alt='Logo de Apple'
-                                width={20}
-                                height={20}
-                                className='w-5'
-                            />
-                            <span className='mt-0.5'>Continuar con Apple</span>
-                        </button>
-
-                        <div className="flex items-center justify-center">
-                            <p className="text-gray-400 text-sm">ó</p>
-                        </div>
 
                         <form onSubmit={handleSubmit} className="flex flex-col gap-4 -mt-2">
                             <div className="flex flex-col gap-2">
@@ -145,7 +122,7 @@ export default function LoginPage() {
                                 />
                             </div>
 
-                            <button 
+                            <button
                                 type="submit"
                                 disabled={loading}
                                 className="bg-primary text-white px-4 py-3 rounded-lg font-medium text-sm hover:bg-primary/75 hover:cursor-pointer transition-all ease-in duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
