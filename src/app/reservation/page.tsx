@@ -110,7 +110,7 @@ export default function ReservationPage() {
                 <button
                     type="submit"
                     disabled={!selectedDate || !selectedTime || loading}
-                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors"
+                    className="w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-blue-700/30 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors"
                 >
                     {loading ? 'Reservando...' : 'Confirmar Reserva'}
                 </button>
