@@ -39,13 +39,29 @@ export default function MyReservationsPage() {
     }
   }, [session]);
 
+  const getLocalISOString = (date: Date) => {
+    const tzOffset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - tzOffset).toISOString().split('T')[0];
+  };
+
   const fetchUserReservations = async () => {
     try {
+        const now = new Date();
+        const today = getLocalISOString(now);
+        const currentTime = now.toLocaleTimeString('es-ES', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+
         // 1. Obtener las reservas creadas por el usuario
         const { data: ownedReservations, error: ownedError } = await supabase
             .from('reservations')
             .select('*')
-            .eq('user_id', session?.user.id);
+            .eq('user_id', session?.user.id)
+            .gte('date', today) // Filtrar por fecha actual o posterior
+            .order('date', { ascending: true })
+            .order('start_time', { ascending: true });
 
         if (ownedError) throw ownedError;
 
@@ -62,13 +78,24 @@ export default function MyReservationsPage() {
         const { data: joinedReservations, error: joinedDetailsError } = await supabase
             .from('reservations')
             .select('*')
-            .in('id', joinedIds);
+            .in('id', joinedIds)
+            .gte('date', today) // Filtrar por fecha actual o posterior
+            .order('date', { ascending: true })
+            .order('start_time', { ascending: true });
 
         if (joinedDetailsError) throw joinedDetailsError;
 
-        // 4. Combinar todas las reservas eliminando duplicados
+        // 4. Combinar y filtrar las reservas
         const uniqueReservations = Array.from(new Map(
             [...(ownedReservations || []), ...(joinedReservations || [])]
+                .filter(reservation => {
+                    // Filtrar reservas pasadas del día actual
+                    if (reservation.date > today) return true;
+                    if (reservation.date === today) {
+                        return reservation.start_time > currentTime;
+                    }
+                    return false;
+                })
                 .map(item => [item.id, item])
         ).values());
 
@@ -87,7 +114,7 @@ export default function MyReservationsPage() {
                         )
                     `)
                     .eq('reservation_id', reservation.id);
-                
+
                 if (playersError) {
                     console.error('Error al obtener jugadores:', playersError);
                     return {
@@ -107,14 +134,7 @@ export default function MyReservationsPage() {
             })
         );
 
-        // 6. Ordenar por fecha y hora
-        const sortedReservations = reservationsWithPlayers.sort((a, b) => {
-            const dateA = new Date(`${a.date}T${a.start_time}`);
-            const dateB = new Date(`${b.date}T${b.start_time}`);
-            return dateA.getTime() - dateB.getTime();
-        });
-
-        setReservations(sortedReservations);
+        setReservations(reservationsWithPlayers);
     } catch (error) {
         console.error('Error:', error);
         toast.error('Error al cargar las reservas');
