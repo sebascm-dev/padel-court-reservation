@@ -41,15 +41,17 @@ export default function ReservationPage() {
 
             if (reservationError) throw reservationError;
 
-            // Añadir al creador como primer jugador
-            const { error: playerError } = await supabase
-                .from('reservation_players')
-                .insert({
-                    reservation_id: reservation.id,
-                    user_id: session.user.id
-                });
+            // Solo añadir al creador como jugador si NO es privada
+            if (!isPrivate) {
+                const { error: playerError } = await supabase
+                    .from('reservation_players')
+                    .insert({
+                        reservation_id: reservation.id,
+                        user_id: session.user.id
+                    });
 
-            if (playerError) throw playerError;
+                if (playerError) throw playerError;
+            }
 
             toast.success('Reserva realizada con éxito');
             router.push('/my-reservations');

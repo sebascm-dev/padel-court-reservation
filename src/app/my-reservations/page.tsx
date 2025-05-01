@@ -182,39 +182,42 @@ export default function MyReservationsPage() {
                     </span>
                 </div>
 
-                {/* Estado del usuario en la reserva */}
-                <div className="flex items-center gap-2 text-sm mb-3">
-                    {reservation.isOwner ? (
-                        <span className="text-green-600 font-medium">Creador</span>
-                    ) : (
-                        <span className="text-blue-600 font-medium">Jugador</span>
-                    )}
-                </div>
+                {/* Estado del usuario y lista de jugadores solo si NO es privada */}
+                {!reservation.is_private && (
+                    <>
+                        <div className="flex items-center gap-2 text-sm mb-3">
+                            {reservation.isOwner ? (
+                                <span className="text-green-600 font-medium">Creador</span>
+                            ) : (
+                                <span className="text-blue-600 font-medium">Jugador</span>
+                            )}
+                        </div>
 
-                {/* Lista de jugadores */}
-                <div>
-                    <p className="text-gray-600 text-sm mb-2">Jugadores:</p>
-                    <ul className="grid gap-2">
-                        {reservation.players.map((player: Player) => (
-                            <li 
-                                key={`${reservation.id}-${player.user_id}`}
-                                className="flex items-center gap-2"
-                            >
-                                <img
-                                    src={player.usuarios.avatar_url || '/default-avatar.png'}
-                                    alt={`${player.usuarios.nombre} ${player.usuarios.apellidos}`}
-                                    className="w-8 h-8 rounded-full object-cover"
-                                />
-                                <span className="text-sm">
-                                    {player.usuarios.nombre} {player.usuarios.apellidos}
-                                </span>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                        <div>
+                            <p className="text-gray-600 text-sm mb-2">Jugadores:</p>
+                            <ul className="grid gap-2">
+                                {reservation.players.map((player: Player) => (
+                                    <li 
+                                        key={`${reservation.id}-${player.user_id}`}
+                                        className="flex items-center gap-2"
+                                    >
+                                        <img
+                                            src={player.usuarios.avatar_url || '/default-avatar.png'}
+                                            alt={`${player.usuarios.nombre} ${player.usuarios.apellidos}`}
+                                            className="w-8 h-8 rounded-full object-cover"
+                                        />
+                                        <span className="text-sm">
+                                            {player.usuarios.nombre} {player.usuarios.apellidos}
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </>
+                )}
 
                 {/* Botones de acción */}
-                <div className="flex justify-end gap-2 mt-4">
+                <div className="flex justify-center gap-2 mt-4">
                     {reservation.isOwner && (
                         <button
                             onClick={() => handleDeleteReservation(reservation.id)}
@@ -239,9 +242,6 @@ export default function MyReservationsPage() {
                             Borrar partido
                         </button>
                     )}
-                    <div className="w-24">
-                        {/* Espacio reservado para el próximo botón */}
-                    </div>
                 </div>
             </div>
           ))}
