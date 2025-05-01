@@ -1,6 +1,6 @@
 "use client"
 import { useState } from 'react';
-import { format } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
@@ -38,5 +38,18 @@ export default function DatePicker({ selectedDate, onChange, minDate, maxDate }:
                 }}
             />
         </div>
+    );
+}
+
+export function App() {
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+    return (
+        <DatePicker
+            selectedDate={selectedDate}
+            onChange={setSelectedDate}
+            minDate={new Date()}
+            maxDate={addDays(new Date(), 15)} // Cambiamos de 30 a 15 días
+        />
     );
 }
