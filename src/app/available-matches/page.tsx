@@ -20,6 +20,7 @@ interface Player {
         nombre: string;
         apellidos: string;
         avatar_url?: string;
+        nivel: number; // Añadimos el nivel
     };
 }
 
@@ -75,7 +76,8 @@ export default function AvailableMatchesPage() {
                                 usuario:user_id (
                                     nombre,
                                     apellidos,
-                                    avatar_url
+                                    avatar_url,
+                                    nivel
                                 )
                             `)
                             .eq('reservation_id', reservation.id);
@@ -149,7 +151,7 @@ export default function AvailableMatchesPage() {
                 <div className="text-center">Cargando partidos...</div>
             ) : reservations.length === 0 ? (
                 <div className="text-center text-gray-500">
-                    No hay partidos disponibles en este momento
+                    No hay partidos disponibles en este momento.
                 </div>
             ) : (
                 <div className="grid gap-4">
@@ -177,9 +179,9 @@ export default function AvailableMatchesPage() {
                                     {[0, 1].map((position) => {
                                         const player = reservation.players[position];
                                         return (
-                                            <div key={`team1-${position}`} className="relative">
+                                            <div key={`team1-${position}`} className="relative group flex flex-col items-center">
                                                 {player?.usuario ? (
-                                                    <div className="relative group">
+                                                    <>
                                                         <button 
                                                             onClick={() => session?.user.id === player.user_id ? handleLeaveMatch(reservation.id) : undefined}
                                                             className="relative w-14 h-14 rounded-full overflow-hidden"
@@ -211,25 +213,27 @@ export default function AvailableMatchesPage() {
                                                                 </div>
                                                             )}
                                                         </button>
-                                                        {/* Tooltip con el nombre */}
-                                                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full 
-                                                                    opacity-0 group-hover:opacity-100 transition-opacity bg-black text-white 
-                                                                    text-xs py-1 px-2 rounded whitespace-nowrap z-10">
-                                                            {player.usuario.nombre}
-                                                            {session?.user.id === player.user_id && " (Click para salir)"}
-                                                        </div>
-                                                    </div>
+                                                        {/* Nivel del jugador */}
+                                                        <span className="mt-1 text-sm font-medium text-gray-600">
+                                                            Nivel {player.usuario.nivel}
+                                                        </span>
+                                                    </>
                                                 ) : (
-                                                    <button
-                                                        onClick={() => handleJoinMatch(reservation.id)}
-                                                        disabled={!session || reservation.players.some(p => p.user_id === session?.user.id)}
-                                                        className="size-14 rounded-full border-2 border-dashed border-gray-300 
-                                                                 flex items-center justify-center hover:border-blue-500 
-                                                                 hover:bg-blue-50 transition-colors disabled:opacity-50 
-                                                                 disabled:hover:border-gray-300 disabled:hover:bg-transparent"
-                                                    >
-                                                        <span className="text-xl text-gray-400 hover:text-blue-500">+</span>
-                                                    </button>
+                                                    <div className="flex flex-col items-center">
+                                                        <button
+                                                            onClick={() => handleJoinMatch(reservation.id)}
+                                                            disabled={!session || reservation.players.some(p => p.user_id === session?.user.id)}
+                                                            className="size-14 rounded-full border-2 border-dashed border-gray-300 
+                                                                     flex items-center justify-center hover:border-blue-500 
+                                                                     hover:bg-blue-50 transition-colors disabled:opacity-50 
+                                                                     disabled:hover:border-gray-300 disabled:hover:bg-transparent"
+                                                        >
+                                                            <span className="text-xl text-gray-400 hover:text-blue-500">+</span>
+                                                        </button>
+                                                        <span className="mt-1 text-sm font-medium text-gray-400">
+                                                            Vacío
+                                                        </span>
+                                                    </div>
                                                 )}
                                             </div>
                                         );
@@ -237,16 +241,25 @@ export default function AvailableMatchesPage() {
                                 </div>
 
                                 {/* VS */}
-                                <div className="text-base font-medium text-gray-500">VS</div>
+                                <div className="flex flex-col items-center">
+                                    <div className="text-base font-medium text-gray-500 mb-1">VS</div>
+                                    {reservation.players.length > 0 && (
+                                        <div className="text-sm text-gray-600">
+                                            {(reservation.players.reduce((acc, player) => 
+                                                acc + (player.usuario?.nivel || 0), 0) / 
+                                                reservation.players.length).toFixed(2)}
+                                        </div>
+                                    )}
+                                </div>
 
                                 {/* Equipo 2 */}
                                 <div className="flex gap-4">
                                     {[2, 3].map((position) => {
                                         const player = reservation.players[position];
                                         return (
-                                            <div key={`team2-${position}`} className="relative">
+                                            <div key={`team2-${position}`} className="relative group flex flex-col items-center">
                                                 {player?.usuario ? (
-                                                    <div className="relative group">
+                                                    <>
                                                         <button 
                                                             onClick={() => session?.user.id === player.user_id ? handleLeaveMatch(reservation.id) : undefined}
                                                             className="relative w-14 h-14 rounded-full overflow-hidden"
@@ -278,25 +291,27 @@ export default function AvailableMatchesPage() {
                                                                 </div>
                                                             )}
                                                         </button>
-                                                        {/* Tooltip con el nombre */}
-                                                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full 
-                                                                    opacity-0 group-hover:opacity-100 transition-opacity bg-black text-white 
-                                                                    text-xs py-1 px-2 rounded whitespace-nowrap z-10">
-                                                            {player.usuario.nombre}
-                                                            {session?.user.id === player.user_id && " (Click para salir)"}
-                                                        </div>
-                                                    </div>
+                                                        {/* Nivel del jugador */}
+                                                        <span className="mt-1 text-sm font-medium text-gray-600">
+                                                            Nivel {player.usuario.nivel}
+                                                        </span>
+                                                    </>
                                                 ) : (
-                                                    <button
-                                                        onClick={() => handleJoinMatch(reservation.id)}
-                                                        disabled={!session || reservation.players.some(p => p.user_id === session?.user.id)}
-                                                        className="size-14 rounded-full border-2 border-dashed border-gray-300 
-                                                                 flex items-center justify-center hover:border-blue-500 
-                                                                 hover:bg-blue-50 transition-colors disabled:opacity-50 
-                                                                 disabled:hover:border-gray-300 disabled:hover:bg-transparent"
-                                                    >
-                                                        <span className="text-xl text-gray-400 hover:text-blue-500">+</span>
-                                                    </button>
+                                                    <div className="flex flex-col items-center">
+                                                        <button
+                                                            onClick={() => handleJoinMatch(reservation.id)}
+                                                            disabled={!session || reservation.players.some(p => p.user_id === session?.user.id)}
+                                                            className="size-14 rounded-full border-2 border-dashed border-gray-300 
+                                                                     flex items-center justify-center hover:border-blue-500 
+                                                                     hover:bg-blue-50 transition-colors disabled:opacity-50 
+                                                                     disabled:hover:border-gray-300 disabled:hover:bg-transparent"
+                                                        >
+                                                            <span className="text-xl text-gray-400 hover:text-blue-500">+</span>
+                                                        </button>
+                                                        <span className="mt-1 text-sm font-medium text-gray-400">
+                                                            Vacío
+                                                        </span>
+                                                    </div>
                                                 )}
                                             </div>
                                         );
