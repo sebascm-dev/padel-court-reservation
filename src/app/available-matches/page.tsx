@@ -103,12 +103,38 @@ export default function AvailableMatchesPage() {
     };
 
     const handleJoinMatch = async (reservationId: string) => {
+        if (!session) return;
+
         try {
+            // 1. Primero verificamos el número actual de jugadores
+            const { data: currentPlayers, error: countError } = await supabase
+                .from('reservation_players')
+                .select('user_id')
+                .eq('reservation_id', reservationId);
+
+            if (countError) throw countError;
+
+            // Verificar si el partido está lleno
+            if (currentPlayers && currentPlayers.length >= 4) {
+                toast.error('El partido está completo');
+                return;
+            }
+
+            // 2. Si hay espacio, intentamos unir al jugador
             const { error } = await supabase
                 .from('reservation_players')
-                .insert({ reservation_id: reservationId, user_id: session?.user.id });
+                .insert({ 
+                    reservation_id: reservationId, 
+                    user_id: session.user.id,
+                    created_at: new Date().toISOString()
+                });
 
             if (error) {
+                // Si hay error por restricción única, significa que ya está lleno
+                if (error.code === '23505') {
+                    toast.error('Ya eres parte de este partido');
+                    return;
+                }
                 throw error;
             }
 
@@ -276,13 +302,17 @@ export default function AvailableMatchesPage() {
                                                     <div className="flex flex-col items-center">
                                                         <button
                                                             onClick={() => handleJoinMatch(reservation.id)}
-                                                            disabled={!session || reservation.players.some(p => p.user_id === session?.user.id)}
+                                                            disabled={!session || 
+                                                                      reservation.players.some(p => p.user_id === session?.user.id) ||
+                                                                      reservation.players.length >= 4}
                                                             className="size-14 rounded-full border-2 border-dashed border-gray-300 
                                                                      flex items-center justify-center hover:border-blue-500 
                                                                      hover:bg-blue-50 transition-colors disabled:opacity-50 
                                                                      disabled:hover:border-gray-300 disabled:hover:bg-transparent"
                                                         >
-                                                            <span className="text-xl text-gray-400 hover:text-blue-500">+</span>
+                                                            <span className="text-xl text-gray-400 hover:text-blue-500">
+                                                                {reservation.players.length >= 4 ? 'Completo' : '+'}
+                                                            </span>
                                                         </button>
                                                         <span className="mt-1 text-sm font-medium text-gray-400">
                                                             Vacío
@@ -361,13 +391,17 @@ export default function AvailableMatchesPage() {
                                                     <div className="flex flex-col items-center">
                                                         <button
                                                             onClick={() => handleJoinMatch(reservation.id)}
-                                                            disabled={!session || reservation.players.some(p => p.user_id === session?.user.id)}
+                                                            disabled={!session || 
+                                                                      reservation.players.some(p => p.user_id === session?.user.id) ||
+                                                                      reservation.players.length >= 4}
                                                             className="size-14 rounded-full border-2 border-dashed border-gray-300 
                                                                      flex items-center justify-center hover:border-blue-500 
                                                                      hover:bg-blue-50 transition-colors disabled:opacity-50 
                                                                      disabled:hover:border-gray-300 disabled:hover:bg-transparent"
                                                         >
-                                                            <span className="text-xl text-gray-400 hover:text-blue-500">+</span>
+                                                            <span className="text-xl text-gray-400 hover:text-blue-500">
+                                                                {reservation.players.length >= 4 ? 'Completo' : '+'}
+                                                            </span>
                                                         </button>
                                                         <span className="mt-1 text-sm font-medium text-gray-400">
                                                             Vacío
