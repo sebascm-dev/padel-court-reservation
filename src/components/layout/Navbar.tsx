@@ -61,6 +61,14 @@ const Navbar = () => {
         }
     };
 
+    const menuItems = [
+        { label: 'Inicio', path: '/' },
+        { label: 'Reservar', path: '/reservation' },
+        { label: 'Mis Reservas', path: '/my-reservations' },
+        { label: 'Partidos Disponibles', path: '/available-matches' },
+        { label: 'Perfil', path: '/profile' }
+    ];
+
     return (
         <nav className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
             <div className="max-w-7xl mx-auto px-4">
@@ -145,18 +153,15 @@ const Navbar = () => {
                             </div>
 
                             {/* Enlaces del menú */}
-                            <button 
-                                onClick={() => handleNavigation('/')}
-                                className="text-left text-lg hover:text-blue-600 transition-colors"
-                            >
-                                Inicio
-                            </button>
-                            <button 
-                                onClick={() => handleNavigation('/profile')}
-                                className="text-left text-lg hover:text-blue-600 transition-colors"
-                            >
-                                Perfil
-                            </button>
+                            {menuItems.map((item) => (
+                                <button 
+                                    key={item.path}
+                                    onClick={() => handleNavigation(item.path)}
+                                    className="text-left text-lg hover:text-blue-600 transition-colors"
+                                >
+                                    {item.label}
+                                </button>
+                            ))}
                             <button
                                 onClick={handleLogout}
                                 className="text-left text-lg text-red-500 hover:text-red-600 transition-colors"
