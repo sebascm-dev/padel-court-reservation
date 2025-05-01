@@ -33,7 +33,7 @@ export default function DatePicker({ selectedDate, onChange, minDate, maxDate }:
                 modifiersStyles={{
                     today: {
                         fontWeight: 'bold',
-                        color: '#3B82F6'
+                        color: '#0000FF'
                     }
                 }}
             />
