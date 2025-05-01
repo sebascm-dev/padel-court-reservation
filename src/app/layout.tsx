@@ -26,11 +26,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="scroll-smooth">
+    <html lang="es">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
           <Navbar />
-          <main>
+          <main className="pt-16"> {/* Añadimos padding-top de 64px (h-16) */}
             {children}
           </main>
           <Toaster position="top-center" />
