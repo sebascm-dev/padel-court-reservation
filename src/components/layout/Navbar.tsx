@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import Image from 'next/image';
 import Avatar from '@/components/ui/Avatar';
 
 const Navbar = () => {
@@ -64,8 +65,8 @@ const Navbar = () => {
         <nav className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
             <div className="max-w-7xl mx-auto px-4">
                 <div className="flex justify-between items-center h-16">
-                    {/* Perfil */}
-                    <div className="flex items-center">
+                    {/* Logo en la barra de navegación */}
+                    <div className="flex items-center gap-2">
                         <Avatar />
                     </div>
 
@@ -132,9 +133,15 @@ const Navbar = () => {
                         </motion.button>
 
                         <div className="p-6 flex flex-col gap-6">
-                            {/* Logo */}
+                            {/* Logo en el menú */}
                             <div className="flex justify-center mb-6">
-                                <h1 className="text-xl font-bold">PadelApp</h1>
+                                <Image
+                                    src="/images/login/favicon.webp"
+                                    alt="PadelApp Logo"
+                                    width={48}
+                                    height={48}
+                                    className="w-12 h-12"
+                                />
                             </div>
 
                             {/* Enlaces del menú */}
