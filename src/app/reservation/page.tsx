@@ -25,7 +25,8 @@ export default function ReservationPage() {
         const endTime = addMinutes(selectedTime, 90);
 
         try {
-            const localDateString = getLocalISOString(selectedDate);
+            // Usar formato de fecha local en lugar de ISO
+            const localDateString = selectedDate.toLocaleDateString('en-CA'); // YYYY-MM-DD
 
             const { data: reservation, error: reservationError } = await supabase
                 .from('reservations')

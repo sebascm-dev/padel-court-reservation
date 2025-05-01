@@ -10,7 +10,7 @@ interface TimeSlotPickerProps {
 }
 
 export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlotPickerProps) {
-    const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+    const [availableSlots, setAvailableSlots] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     // Función para verificar si un horario ya ha pasado
@@ -56,28 +56,37 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
     const fetchReservedSlots = async () => {
         setLoading(true);
         try {
-            // Verificar si la fecha está más allá de 15 días
             if (isDateTooFarAhead(date)) {
                 setAvailableSlots([]);
                 return;
             }
 
-            const dateString = date.toISOString().split('T')[0];
+            // Formatear la fecha correctamente sin depender de toISOString
+            const dateString = date.toLocaleDateString('en-CA'); // Formato YYYY-MM-DD
             
             // Obtener las reservas para el día seleccionado
             const { data: reservations, error } = await supabase
                 .from('reservations')
-                .select('start_time')
+                .select('start_time, user_id')
                 .eq('date', dateString);
 
             if (error) throw error;
 
-            // Obtener todos los horarios posibles
             const allSlots = generateTimeSlots();
             
-            // Filtrar los horarios que ya están reservados
-            const reservedTimes = reservations?.map(r => r.start_time.slice(0, 5)) || [];
-            const availableTimes = allSlots.filter(time => !reservedTimes.includes(time));
+            // Crear un mapa de horarios reservados
+            const reservedTimesMap = new Map(
+                reservations?.map(r => [
+                    r.start_time.slice(0, 5),
+                    { isReserved: true, userId: r.user_id }
+                ]) || []
+            );
+
+            // Actualizar los slots disponibles con información de reserva
+            const availableTimes = allSlots.map(time => ({
+                time,
+                ...reservedTimesMap.get(time) || { isReserved: false, userId: null }
+            }));
 
             setAvailableSlots(availableTimes);
         } catch (error) {
@@ -105,7 +114,7 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
 
     return (
         <div className="grid grid-cols-1 gap-2">
-            {availableSlots.map((time) => {
+            {availableSlots.map(({ time, isReserved }) => {
                 const isPassed = isTimeSlotPassed(time);
                 
                 return (
@@ -113,11 +122,11 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
                         key={time}
                         type="button"
                         onClick={() => onChange(time)}
-                        disabled={isPassed}
+                        disabled={isPassed || isReserved}
                         className={`p-2 rounded-lg text-center transition-colors
                             ${selectedTime === time 
                                 ? 'bg-blue-600 text-white' 
-                                : isPassed
+                                : isPassed || isReserved
                                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
                     >
@@ -125,6 +134,11 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
                         {isPassed && (
                             <span className="ml-2 text-sm text-gray-500">
                                 (Hora pasada)
+                            </span>
+                        )}
+                        {isReserved && (
+                            <span className="ml-2 text-sm text-gray-500">
+                                (Reservado)
                             </span>
                         )}
                     </button>
