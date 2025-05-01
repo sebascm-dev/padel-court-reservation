@@ -129,7 +129,7 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
                         buttonStyle = 'bg-red-100 text-red-800 border-2 border-red-500';
                     }
                 } else {
-                    buttonStyle = 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300';
+                    buttonStyle = 'bg-gray-100 hover:bg-gray-200 text-gray-700 border-2 border-gray-300';
                 }
 
                 return (
