@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
 import DatePicker from '@/components/reservation/DatePicker';
 import TimeSlotPicker from '@/components/reservation/TimeSlotPicker';
-import { addMinutes, addDays } from '@/utils/dateUtils';
+import { addMinutes, addDays, getLocalISOString } from '@/utils/dateUtils';
 
 export default function ReservationPage() {
     const router = useRouter();
@@ -25,12 +25,13 @@ export default function ReservationPage() {
         const endTime = addMinutes(selectedTime, 90);
 
         try {
-            // Insertar la reserva
+            const localDateString = getLocalISOString(selectedDate);
+
             const { data: reservation, error: reservationError } = await supabase
                 .from('reservations')
                 .insert({
                     user_id: session.user.id,
-                    date: selectedDate.toISOString().split('T')[0],
+                    date: localDateString,
                     start_time: startTime,
                     end_time: endTime,
                     is_private: isPrivate

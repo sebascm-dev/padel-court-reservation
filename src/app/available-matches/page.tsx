@@ -6,6 +6,13 @@ import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+// Añade estas funciones de utilidad al principio del archivo, después de los imports
+const getLocalISOString = (date: Date) => {
+    const offset = date.getTimezoneOffset();
+    const localDate = new Date(date.getTime() - offset * 60 * 1000);
+    return localDate.toISOString().split('T')[0];
+};
+
 interface Player {
     user_id: string;
     usuario?: {
@@ -38,6 +45,9 @@ export default function AvailableMatchesPage() {
 
     const fetchReservations = async () => {
         try {
+            const today = new Date();
+            const localDateString = getLocalISOString(today);
+
             const { data: reservationsData, error: reservationsError } = await supabase
                 .from('reservations')
                 .select(`
@@ -50,7 +60,7 @@ export default function AvailableMatchesPage() {
                     )
                 `)
                 .eq('is_private', false)
-                .gte('date', new Date().toISOString().split('T')[0]);
+                .gte('date', localDateString);
 
             if (reservationsError) throw reservationsError;
 
@@ -150,7 +160,9 @@ export default function AvailableMatchesPage() {
                             {/* Encabezado con fecha y hora */}
                             <div className="flex justify-between items-start mb-4">
                                 <h3 className="font-semibold text-lg">
-                                    {format(new Date(reservation.date), 'EEEE d \'de\' MMMM', { locale: es })}
+                                    {format(new Date(`${reservation.date}T00:00:00`), 'EEEE d \'de\' MMMM', { 
+                                        locale: es 
+                                    })}
                                 </h3>
                                 <span className="text-lg font-medium">
                                     {reservation.start_time.slice(0, 5)}

@@ -11,10 +11,20 @@ export const addMinutes = (time: string, minutes: number): string => {
     });
 };
 
-export const addDays = (date: Date, days: number): Date => {
-    return dateFnsAddDays(date, days);
-};
+// Other utility functions
 
-export const formatTimeWithZone = (time: string): string => {
-    return `${time}:00+02:00`; // Zona horaria España
-};
+export function addMinutesToDate(date: Date, minutes: number): Date {
+    const result = new Date(date);
+    result.setMinutes(result.getMinutes() + minutes);
+    return result;
+}
+
+export function addDays(date: Date, days: number): Date {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+}
+
+export function getLocalISOString(date: Date): string {
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString();
+}
