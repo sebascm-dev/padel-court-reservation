@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { toast } from 'react-hot-toast';
 import { formatDisplayEndTime } from '@/utils/dateUtils';
+import UserAvatar from '@/components/common/UserAvatar';
 
 interface Player {
     user_id: string;
@@ -202,10 +203,12 @@ export default function MyReservationsPage() {
                                         key={`${reservation.id}-${player.user_id}`}
                                         className="flex items-center gap-2"
                                     >
-                                        <img
-                                            src={player.usuarios.avatar_url || '/default-avatar.png'}
-                                            alt={`${player.usuarios.nombre} ${player.usuarios.apellidos}`}
-                                            className="w-8 h-8 rounded-full object-cover"
+                                        <UserAvatar
+                                            nombre={player.usuarios.nombre}
+                                            apellidos={player.usuarios.apellidos}
+                                            avatarUrl={player.usuarios.avatar_url}
+                                            size="sm"
+                                            className="w-8 h-8"
                                         />
                                         <span className="text-sm">
                                             {player.usuarios.nombre} {player.usuarios.apellidos}
