@@ -12,6 +12,10 @@ interface ProfileData {
     nombre?: string;
     apellidos?: string;
     email?: string;
+    telefono?: string;
+    sexo?: string;
+    nivel?: string;
+    localidad?: string;
     avatar_url?: string;
 }
 
@@ -66,7 +70,11 @@ export default function ProfilePage() {
                 .from('usuarios')
                 .update({
                     nombre: profile.nombre,
-                    apellidos: profile.apellidos
+                    apellidos: profile.apellidos,
+                    telefono: profile.telefono,
+                    sexo: profile.sexo,
+                    nivel: profile.nivel,
+                    localidad: profile.localidad
                 })
                 .eq('id', session?.user.id);
 
@@ -103,42 +111,104 @@ export default function ProfilePage() {
                     </div>
 
                     <form onSubmit={updateProfile} className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Nombre
-                            </label>
-                            <input
-                                type="text"
-                                value={profile.nombre || ''}
-                                onChange={(e) => setProfile({ ...profile, nombre: e.target.value })}
-                                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                disabled={updating}
-                            />
-                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Nombre
+                                </label>
+                                <input
+                                    type="text"
+                                    value={profile.nombre || ''}
+                                    onChange={(e) => setProfile({ ...profile, nombre: e.target.value })}
+                                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    disabled={updating}
+                                />
+                            </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Apellidos
-                            </label>
-                            <input
-                                type="text"
-                                value={profile.apellidos || ''}
-                                onChange={(e) => setProfile({ ...profile, apellidos: e.target.value })}
-                                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                disabled={updating}
-                            />
-                        </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Apellidos
+                                </label>
+                                <input
+                                    type="text"
+                                    value={profile.apellidos || ''}
+                                    onChange={(e) => setProfile({ ...profile, apellidos: e.target.value })}
+                                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    disabled={updating}
+                                />
+                            </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Email
-                            </label>
-                            <input
-                                type="email"
-                                value={session?.user?.email || ''}
-                                disabled
-                                className="w-full p-2 border rounded bg-gray-50"
-                            />
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Email
+                                </label>
+                                <input
+                                    type="email"
+                                    value={session?.user?.email || ''}
+                                    disabled
+                                    className="w-full p-2 border rounded bg-gray-50"
+                                />
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <label htmlFor="telefono" className="text-sm text-gray-600">Teléfono</label>
+                                <input
+                                    type="tel"
+                                    id="telefono"
+                                    placeholder="600000000"
+                                    className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    value={profile.telefono || ''}
+                                    onChange={(e) => setProfile({...profile, telefono: e.target.value})}
+                                    disabled={updating}
+                                />
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <label htmlFor="sexo" className="text-sm text-gray-600">Sexo</label>
+                                <select
+                                    id="sexo"
+                                    className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    value={profile.sexo || ''}
+                                    onChange={(e) => setProfile({...profile, sexo: e.target.value})}
+                                    disabled={updating}
+                                >
+                                    <option value="">Selecciona</option>
+                                    <option value="masculino">Masculino</option>
+                                    <option value="femenino">Femenino</option>
+                                </select>
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <label htmlFor="nivel" className="text-sm text-gray-600">Nivel (1-10)</label>
+                                <div className="flex flex-col">
+                                    <input
+                                        type="range"
+                                        id="nivel"
+                                        min="1"
+                                        max="10"
+                                        className="w-full"
+                                        value={profile.nivel || '5'}
+                                        onChange={(e) => setProfile({...profile, nivel: e.target.value})}
+                                        disabled={updating}
+                                    />
+                                    <span className="text-center text-sm text-gray-600">
+                                        Nivel: {profile.nivel || '5'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <label htmlFor="localidad" className="text-sm text-gray-600">Localidad</label>
+                                <input
+                                    type="text"
+                                    id="localidad"
+                                    placeholder="Tu localidad"
+                                    className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    value={profile.localidad || ''}
+                                    onChange={(e) => setProfile({...profile, localidad: e.target.value})}
+                                    disabled={updating}
+                                />
+                            </div>
                         </div>
 
                         <button
