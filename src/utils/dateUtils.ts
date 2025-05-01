@@ -12,6 +12,17 @@ export const addMinutes = (time: string, minutes: number): string => {
     });
 };
 
+export const formatDisplayEndTime = (time: string): string => {
+    const [hours, minutes] = time.split(':').map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes + 2); // Añadimos 2 minutos para visualización
+    return date.toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    });
+};
+
 // Other utility functions
 
 export function addMinutesToDate(date: Date, minutes: number): Date {

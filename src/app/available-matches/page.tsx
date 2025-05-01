@@ -5,6 +5,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { formatDisplayEndTime } from '@/utils/dateUtils';
 
 // Añade estas funciones de utilidad al principio del archivo, después de los imports
 const getLocalISOString = (date: Date) => {
@@ -306,7 +307,7 @@ export default function AvailableMatchesPage() {
                             {/* Footer con información */}
                             <div className="flex justify-between items-center text-sm text-gray-500 mt-3">
                                 <div>
-                                    Creado por: {reservation.usuarios?.nombre} {reservation.usuarios?.apellidos}
+                                    {reservation.start_time.slice(0, 5)} a {formatDisplayEndTime(reservation.end_time)}
                                 </div>
                                 <div>
                                     {reservation.players.length}/4 jugadores
