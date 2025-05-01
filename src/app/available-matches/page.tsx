@@ -223,8 +223,20 @@ export default function AvailableMatchesPage() {
                     {reservations.map((reservation) => (
                         <div
                             key={reservation.id}
-                            className="border rounded-lg p-2 bg-white shadow-sm"
+                            className="border rounded-lg border-gray-300/50 p-2 bg-white shadow-lg relative"
                         >
+                            {/* Overlay para partido completo */}
+                            {reservation.players.length >= 4 && 
+                            !reservation.players.some(p => p.user_id === session?.user.id) && (
+                                <div className="absolute inset-0 bg-black/70 backdrop-blur-xs 
+                                              rounded-lg z-10 flex items-center justify-center">
+                                    <div className="bg-red-500/60 text-white px-6 py-3 rounded-lg 
+                                                  font-semibold text-lg shadow-xl transform">
+                                        Partido Completo
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Encabezado con fecha y hora */}
                             <div className="flex justify-between items-start mb-4">
                                 <h3 className="font-semibold text-lg">
