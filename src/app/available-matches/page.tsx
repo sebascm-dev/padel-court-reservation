@@ -119,19 +119,57 @@ export default function AvailableMatchesPage() {
         }
     };
 
-    const handleLeaveMatch = async (reservationId: string) => {
+    const handleLeaveMatch = async (reservationId: string, isCreator: boolean) => {
         try {
-            const { error } = await supabase
-                .from('reservation_players')
-                .delete()
-                .eq('reservation_id', reservationId)
-                .eq('user_id', session?.user.id);
+            if (isCreator) {
+                const shouldCancel = window.confirm(
+                    '¿Eres el creador del partido. ¿Quieres cancelar la reserva completa? ' +
+                    'Esto eliminará el partido para todos los jugadores.'
+                );
 
-            if (error) {
-                throw error;
+                if (shouldCancel) {
+                    // Primero borramos los jugadores
+                    const { error: playersError } = await supabase
+                        .from('reservation_players')
+                        .delete()
+                        .eq('reservation_id', reservationId);
+
+                    if (playersError) throw playersError;
+
+                    // Luego borramos la reserva
+                    const { error: reservationError } = await supabase
+                        .from('reservations')
+                        .delete()
+                        .eq('id', reservationId);
+
+                    if (reservationError) throw reservationError;
+
+                    toast.success('Reserva cancelada correctamente');
+                } else {
+                    // Si no quiere cancelar la reserva, solo se sale como jugador
+                    const { error } = await supabase
+                        .from('reservation_players')
+                        .delete()
+                        .eq('reservation_id', reservationId)
+                        .eq('user_id', session?.user.id);
+
+                    if (error) throw error;
+                    
+                    toast.success('Te has salido del partido');
+                }
+            } else {
+                // Comportamiento normal para jugadores no creadores
+                const { error } = await supabase
+                    .from('reservation_players')
+                    .delete()
+                    .eq('reservation_id', reservationId)
+                    .eq('user_id', session?.user.id);
+
+                if (error) throw error;
+                
+                toast.success('Te has salido del partido');
             }
 
-            toast.success('Te has salido del partido');
             fetchReservations();
         } catch (error) {
             console.error('Error al salirse del partido:', error);
@@ -183,7 +221,14 @@ export default function AvailableMatchesPage() {
                                                 {player?.usuario ? (
                                                     <>
                                                         <button 
-                                                            onClick={() => session?.user.id === player.user_id ? handleLeaveMatch(reservation.id) : undefined}
+                                                            onClick={() => {
+                                                                if (session?.user.id === player.user_id) {
+                                                                    handleLeaveMatch(
+                                                                        reservation.id, 
+                                                                        session.user.id === reservation.user_id
+                                                                    );
+                                                                }
+                                                            }}
                                                             className="relative w-14 h-14 rounded-full overflow-hidden"
                                                             title={session?.user.id === player.user_id ? "Salir del partido" : player.usuario.nombre}
                                                         >
@@ -261,7 +306,14 @@ export default function AvailableMatchesPage() {
                                                 {player?.usuario ? (
                                                     <>
                                                         <button 
-                                                            onClick={() => session?.user.id === player.user_id ? handleLeaveMatch(reservation.id) : undefined}
+                                                            onClick={() => {
+                                                                if (session?.user.id === player.user_id) {
+                                                                    handleLeaveMatch(
+                                                                        reservation.id, 
+                                                                        session.user.id === reservation.user_id
+                                                                    );
+                                                                }
+                                                            }}
                                                             className="relative w-14 h-14 rounded-full overflow-hidden"
                                                             title={session?.user.id === player.user_id ? "Salir del partido" : player.usuario.nombre}
                                                         >
