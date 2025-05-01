@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 interface TimeSlotPickerProps {
     selectedTime: string | null;
@@ -10,6 +11,7 @@ interface TimeSlotPickerProps {
 }
 
 export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlotPickerProps) {
+    const { session } = useAuth();
     const [availableSlots, setAvailableSlots] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -61,10 +63,8 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
                 return;
             }
 
-            // Formatear la fecha correctamente sin depender de toISOString
-            const dateString = date.toLocaleDateString('en-CA'); // Formato YYYY-MM-DD
+            const dateString = date.toLocaleDateString('en-CA');
             
-            // Obtener las reservas para el día seleccionado
             const { data: reservations, error } = await supabase
                 .from('reservations')
                 .select('start_time, user_id')
@@ -82,8 +82,10 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
                 ]) || []
             );
 
-            // Actualizar los slots disponibles con información de reserva
-            const availableTimes = allSlots.map(time => ({
+            // Filtrar las horas pasadas y actualizar los slots disponibles
+            const currentSlots = allSlots.filter(time => !isTimeSlotPassed(time));
+            
+            const availableTimes = currentSlots.map(time => ({
                 time,
                 ...reservedTimesMap.get(time) || { isReserved: false, userId: null }
             }));
@@ -114,31 +116,38 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
 
     return (
         <div className="grid grid-cols-1 gap-2">
-            {availableSlots.map(({ time, isReserved }) => {
-                const isPassed = isTimeSlotPassed(time);
+            {availableSlots.map(({ time, isReserved, userId }) => {
+                const isMyReservation = isReserved && userId === session?.user.id;
                 
+                let buttonStyle = '';
+                if (selectedTime === time) {
+                    buttonStyle = 'bg-primary text-white border-2 border-blue-700/30';
+                } else if (isReserved) {
+                    if (isMyReservation) {
+                        buttonStyle = 'bg-green-100 text-green-800 border-2 border-green-500';
+                    } else {
+                        buttonStyle = 'bg-red-100 text-red-800 border-2 border-red-500';
+                    }
+                } else {
+                    buttonStyle = 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300';
+                }
+
                 return (
                     <button
                         key={time}
                         type="button"
-                        onClick={() => onChange(time)}
-                        disabled={isPassed || isReserved}
-                        className={`p-2 rounded-lg text-center transition-colors
-                            ${selectedTime === time 
-                                ? 'bg-blue-600 text-white' 
-                                : isPassed || isReserved
-                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+                        onClick={() => !isReserved && onChange(time)}
+                        disabled={isReserved}
+                        className={`p-3 relative rounded-lg text-center transition-colors flex justify-center items-center ${buttonStyle}`}
                     >
-                        {time}
-                        {isPassed && (
-                            <span className="ml-2 text-sm text-gray-500">
-                                (Hora pasada)
-                            </span>
-                        )}
+                        <span className="font-medium">{time}</span>
                         {isReserved && (
-                            <span className="ml-2 text-sm text-gray-500">
-                                (Reservado)
+                            <span className={`absolute right-3 text-sm px-2 py-0.5 rounded
+                                ${isMyReservation 
+                                    ? 'bg-green-200 text-green-800' 
+                                    : 'bg-red-200 text-red-800'}`}
+                            >
+                                {isMyReservation ? 'Tu Reserva' : 'Reservado'}
                             </span>
                         )}
                     </button>
