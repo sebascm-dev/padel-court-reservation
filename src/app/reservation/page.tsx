@@ -22,12 +22,12 @@ export default function ReservationPage() {
 
         setLoading(true);
         const startTime = selectedTime;
-        // Restamos 1 minuto a la duración total
-        const endTime = addMinutes(selectedTime, 89); // Cambiamos de 90 a 89 minutos
+        const endTime = addMinutes(selectedTime, 89);
 
         try {
             const localDateString = selectedDate.toLocaleDateString('en-CA');
 
+            // 1. Crear la reserva
             const { data: reservation, error: reservationError } = await supabase
                 .from('reservations')
                 .insert({
@@ -40,15 +40,23 @@ export default function ReservationPage() {
                 .select()
                 .single();
 
-            if (reservationError) throw reservationError;
+            if (reservationError) {
+                // Verificar si es el error de solapamiento
+                if (reservationError.code === '23P01') {
+                    toast.error('Esta pista ya ha sido reservada para ese horario');
+                    return;
+                }
+                throw reservationError;
+            }
 
-            // Solo añadir al creador como jugador si NO es privada
-            if (!isPrivate) {
+            // 2. Si no es privada, añadir al creador como jugador automáticamente
+            if (!isPrivate && reservation) {
                 const { error: playerError } = await supabase
                     .from('reservation_players')
                     .insert({
                         reservation_id: reservation.id,
-                        user_id: session.user.id
+                        user_id: session.user.id,
+                        created_at: new Date().toISOString()
                     });
 
                 if (playerError) throw playerError;
@@ -57,8 +65,8 @@ export default function ReservationPage() {
             toast.success('Reserva realizada con éxito');
             router.push('/my-reservations');
         } catch (error: any) {
-            toast.error('Error al realizar la reserva');
             console.error('Error:', error.message);
+            toast.error('Error al realizar la reserva');
         } finally {
             setLoading(false);
         }
