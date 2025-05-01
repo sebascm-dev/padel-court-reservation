@@ -106,6 +106,26 @@ export default function AvailableMatchesPage() {
         }
     };
 
+    const handleLeaveMatch = async (reservationId: string) => {
+        try {
+            const { error } = await supabase
+                .from('reservation_players')
+                .delete()
+                .eq('reservation_id', reservationId)
+                .eq('user_id', session?.user.id);
+
+            if (error) {
+                throw error;
+            }
+
+            toast.success('Te has salido del partido');
+            fetchReservations();
+        } catch (error) {
+            console.error('Error al salirse del partido:', error);
+            toast.error('Error al salirse del partido');
+        }
+    };
+
     useEffect(() => {
         fetchReservations();
     }, []);
@@ -147,15 +167,43 @@ export default function AvailableMatchesPage() {
                                             <div key={`team1-${position}`} className="relative">
                                                 {player?.usuario ? (
                                                     <div className="relative group">
-                                                        <img
-                                                            src={player.usuario.avatar_url || '/default-avatar.png'}
-                                                            alt={player.usuario.nombre}
-                                                            className="size-14 rounded-full border-2 object-cover border-gray-200"
-                                                        />
+                                                        <button 
+                                                            onClick={() => session?.user.id === player.user_id ? handleLeaveMatch(reservation.id) : undefined}
+                                                            className="relative w-14 h-14 rounded-full overflow-hidden"
+                                                            title={session?.user.id === player.user_id ? "Salir del partido" : player.usuario.nombre}
+                                                        >
+                                                            <img
+                                                                src={player.usuario.avatar_url || '/default-avatar.png'}
+                                                                alt={player.usuario.nombre}
+                                                                className={`w-full h-full object-cover rounded-full border-2 border-gray-200 
+                                                                         transition-all duration-300 ${session?.user.id === player.user_id ? 'opacity-50' : ''}`}
+                                                            />
+                                                            {/* Icono de papelera siempre visible para el usuario actual */}
+                                                            {session?.user.id === player.user_id && (
+                                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                                    <svg 
+                                                                        className="w-8 h-8 text-red-500 transition-transform duration-300 
+                                                                                group-hover:scale-110"
+                                                                        viewBox="0 0 24 24" 
+                                                                        fill="none" 
+                                                                        stroke="currentColor" 
+                                                                        strokeWidth="2"
+                                                                    >
+                                                                        <path d="M3 6h18" />
+                                                                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                                                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                                        <line x1="10" y1="11" x2="10" y2="17" />
+                                                                        <line x1="14" y1="11" x2="14" y2="17" />
+                                                                    </svg>
+                                                                </div>
+                                                            )}
+                                                        </button>
+                                                        {/* Tooltip con el nombre */}
                                                         <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full 
                                                                     opacity-0 group-hover:opacity-100 transition-opacity bg-black text-white 
                                                                     text-xs py-1 px-2 rounded whitespace-nowrap z-10">
                                                             {player.usuario.nombre}
+                                                            {session?.user.id === player.user_id && " (Click para salir)"}
                                                         </div>
                                                     </div>
                                                 ) : (
@@ -186,15 +234,43 @@ export default function AvailableMatchesPage() {
                                             <div key={`team2-${position}`} className="relative">
                                                 {player?.usuario ? (
                                                     <div className="relative group">
-                                                        <img
-                                                            src={player.usuario.avatar_url || '/default-avatar.png'}
-                                                            alt={player.usuario.nombre}
-                                                            className="size-14 rounded-full border-2 object-cover border-gray-200"
-                                                        />
+                                                        <button 
+                                                            onClick={() => session?.user.id === player.user_id ? handleLeaveMatch(reservation.id) : undefined}
+                                                            className="relative w-14 h-14 rounded-full overflow-hidden"
+                                                            title={session?.user.id === player.user_id ? "Salir del partido" : player.usuario.nombre}
+                                                        >
+                                                            <img
+                                                                src={player.usuario.avatar_url || '/default-avatar.png'}
+                                                                alt={player.usuario.nombre}
+                                                                className={`w-full h-full object-cover rounded-full border-2 border-gray-200 
+                                                                         transition-all duration-300 ${session?.user.id === player.user_id ? 'opacity-50' : ''}`}
+                                                            />
+                                                            {/* Icono de papelera siempre visible para el usuario actual */}
+                                                            {session?.user.id === player.user_id && (
+                                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                                    <svg 
+                                                                        className="w-8 h-8 text-red-500 transition-transform duration-300 
+                                                                                group-hover:scale-110"
+                                                                        viewBox="0 0 24 24" 
+                                                                        fill="none" 
+                                                                        stroke="currentColor" 
+                                                                        strokeWidth="2"
+                                                                    >
+                                                                        <path d="M3 6h18" />
+                                                                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                                                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                                        <line x1="10" y1="11" x2="10" y2="17" />
+                                                                        <line x1="14" y1="11" x2="14" y2="17" />
+                                                                    </svg>
+                                                                </div>
+                                                            )}
+                                                        </button>
+                                                        {/* Tooltip con el nombre */}
                                                         <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full 
                                                                     opacity-0 group-hover:opacity-100 transition-opacity bg-black text-white 
                                                                     text-xs py-1 px-2 rounded whitespace-nowrap z-10">
                                                             {player.usuario.nombre}
+                                                            {session?.user.id === player.user_id && " (Click para salir)"}
                                                         </div>
                                                     </div>
                                                 ) : (
