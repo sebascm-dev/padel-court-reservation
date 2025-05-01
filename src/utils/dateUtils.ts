@@ -3,7 +3,8 @@ import { addDays as dateFnsAddDays } from 'date-fns';
 export const addMinutes = (time: string, minutes: number): string => {
     const [hours, mins] = time.split(':').map(Number);
     const date = new Date();
-    date.setHours(hours, mins + minutes);
+    // Restamos 1 minuto para evitar solapamiento
+    date.setHours(hours, mins + minutes - 1);
     return date.toLocaleTimeString('es-ES', {
         hour: '2-digit',
         minute: '2-digit',

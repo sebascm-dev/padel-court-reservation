@@ -22,11 +22,11 @@ export default function ReservationPage() {
 
         setLoading(true);
         const startTime = selectedTime;
-        const endTime = addMinutes(selectedTime, 90);
+        // Restamos 1 minuto a la duración total
+        const endTime = addMinutes(selectedTime, 89); // Cambiamos de 90 a 89 minutos
 
         try {
-            // Usar formato de fecha local en lugar de ISO
-            const localDateString = selectedDate.toLocaleDateString('en-CA'); // YYYY-MM-DD
+            const localDateString = selectedDate.toLocaleDateString('en-CA');
 
             const { data: reservation, error: reservationError } = await supabase
                 .from('reservations')
