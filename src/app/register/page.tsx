@@ -105,192 +105,240 @@ export default function RegisterPage() {
     }
 
     return (
-        <div className="min-h-screen relative">
-            <div className='fixed inset-0'>
-                <div className='absolute inset-0 bg-black/30 backdrop-blur-sm z-10'></div>
+        <div className="h-screen fixed inset-0 bg-gray-900 overflow-hidden">
+            {/* Fondo con gradiente suave */}
+            <div className='absolute inset-0'>
+                <div className='absolute inset-0 backdrop-blur-xs z-10'></div>
                 <Image
                     src="/images/login/loginBackground.webp"
-                    alt="Logo de Padel Court Reservation"
+                    alt="Background"
                     fill
                     priority
-                    className='object-cover'
+                    sizes="100vw"
+                    className='object-cover opacity-10'
                 />
             </div>
 
-            <div className="relative z-20 mx-auto max-w-6xl">
-                <header className='h-[25vh] relative overflow-hidden flex items-center justify-center'>
-                    <div className='relative size-32'>
+            {/* Contenido principal */}
+            <div className="relative z-20 mx-auto w-full max-w-md h-full flex flex-col justify-start">
+                {/* Header con animación suave */}
+                <header className='flex items-center justify-center mb-12 pt-12'>
+                    <motion.div
+                        className='relative size-28'
+                        animate={{
+                            scale: [1, 1.05, 1],
+                        }}
+                        transition={{
+                            duration: 1.5,
+                            repeat: Infinity,
+                            repeatType: "reverse",
+                            ease: "easeInOut"
+                        }}
+                    >
                         <Image
                             src="/images/login/favicon.webp"
-                            alt="Logo de Padel Court Reservation"
+                            alt="Logo"
                             fill
                             priority
-                            className='object-contain -mt-7.5'
+                            className='object-contain drop-shadow-lg'
                         />
-                    </div>
+                    </motion.div>
                 </header>
 
-                <motion.footer 
-                    initial={{ y: "100%" }}
-                    animate={{ y: 0 }}
-                    transition={{ 
-                        type: "spring",
-                        damping: 25,
-                        stiffness: 180,
+                {/* Contenedor del formulario */}
+                <motion.div
+                    initial={{ y: '100%', opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{
+                        duration: 0.5,
+                        ease: "easeInOut",
+                        delay: 0.2,
                     }}
-                    className='min-h-[75vh] relative z-10 overflow-hidden rounded-t-[2.5rem] bg-background -mt-8'
+                    className='relative z-10 flex-1 min-h-0'
                 >
-                    <div className='flex flex-col gap-4 p-6 pb-8'>
-                        <h1 className='text-2xl text-gray-800 font-semibold mt-2 mb-4'>Crear nueva cuenta</h1>
+                    <div className='bg-white rounded-t-[40px] h-full overflow-y-auto'>
+                        <div className='p-8 pb-20 pt-10'>
+                            <h1 className='text-2xl font-semibold text-gray-800 text-center'>
+                                Crear nueva cuenta 🎾
+                            </h1>
+                            <p className='text-sm text-gray-700/45 text-center mb-6'>
+                                Regístrate para empezar a disfrutar de todas las funcionalidades
+                            </p>
 
-                        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="flex flex-col gap-2">
-                                    <label htmlFor="nombre" className="text-sm text-gray-600">Nombre</label>
-                                    <input
-                                        type="text"
-                                        id="nombre"
-                                        required
-                                        placeholder="Tu nombre"
-                                        className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={formData.nombre}
-                                        onChange={(e) => setFormData({...formData, nombre: e.target.value})}
-                                    />
-                                </div>
-
-                                <div className="flex flex-col gap-2">
-                                    <label htmlFor="apellidos" className="text-sm text-gray-600">Apellidos</label>
-                                    <input
-                                        type="text"
-                                        id="apellidos"
-                                        required
-                                        placeholder="Tus apellidos"
-                                        className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={formData.apellidos}
-                                        onChange={(e) => setFormData({...formData, apellidos: e.target.value})}
-                                    />
-                                </div>
-
-                                <div className="flex flex-col gap-2">
-                                    <label htmlFor="email" className="text-sm text-gray-600">Email</label>
-                                    <input
-                                        type="email"
-                                        id="email"
-                                        required
-                                        placeholder="ejemplo@correo.com"
-                                        className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={formData.email}
-                                        onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                    />
-                                </div>
-
-                                <div className="flex flex-col gap-2">
-                                    <label htmlFor="telefono" className="text-sm text-gray-600">Teléfono</label>
-                                    <input
-                                        type="tel"
-                                        id="telefono"
-                                        required
-                                        placeholder="600000000"
-                                        className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={formData.telefono}
-                                        onChange={(e) => setFormData({...formData, telefono: e.target.value})}
-                                    />
-                                </div>
-
-                                <div className="flex flex-col gap-2">
-                                    <label htmlFor="fechaNacimiento" className="text-sm text-gray-600">Fecha de nacimiento</label>
-                                    <input
-                                        type="date"
-                                        id="fechaNacimiento"
-                                        required
-                                        className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={formData.fechaNacimiento}
-                                        onChange={(e) => setFormData({...formData, fechaNacimiento: e.target.value})}
-                                    />
-                                </div>
-
-                                <div className="flex flex-col gap-2">
-                                    <label htmlFor="sexo" className="text-sm text-gray-600">Sexo</label>
-                                    <select
-                                        id="sexo"
-                                        required
-                                        className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={formData.sexo}
-                                        onChange={(e) => setFormData({...formData, sexo: e.target.value})}
-                                    >
-                                        <option value="">Selecciona</option>
-                                        <option value="masculino">Masculino</option>
-                                        <option value="femenino">Femenino</option>
-                                    </select>
-                                </div>
-
-                                <div className="flex flex-col gap-2">
-                                    <label htmlFor="nivel" className="text-sm text-gray-600">Nivel (1-10)</label>
-                                    <div className="flex flex-col gap-1">
+                            <form onSubmit={handleSubmit} className="flex flex-col gap-4 mb-16">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Mantener los mismos inputs pero con los nuevos estilos */}
+                                    <div className="space-y-2">
+                                        <label htmlFor="nombre" className="text-sm text-gray-500 font-normal">
+                                            Nombre
+                                        </label>
                                         <input
-                                            type="range"
-                                            id="nivel"
-                                            min="1"
-                                            max="10"
-                                            className="px-4 py-2"
-                                            value={formData.nivel}
-                                            onChange={(e) => setFormData({...formData, nivel: e.target.value})}
+                                            type="text"
+                                            id="nombre"
+                                            required
+                                            placeholder="Tu nombre"
+                                            className="w-full px-4 py-3 rounded-lg border-gray-200 bg-gray-50 focus:outline-none focus:border-gray-300 transition-all"
+                                            value={formData.nombre}
+                                            onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
                                         />
-                                        <span className="text-center text-sm text-gray-600">
-                                            Nivel: {getNivelDescription(formData.nivel)}
-                                        </span>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label htmlFor="apellidos" className="text-sm text-gray-500 font-normal">
+                                            Apellidos
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="apellidos"
+                                            required
+                                            placeholder="Tus apellidos"
+                                            className="w-full px-4 py-3 rounded-lg border-gray-200 bg-gray-50 focus:outline-none focus:border-gray-300 transition-all"
+                                            value={formData.apellidos}
+                                            onChange={(e) => setFormData({ ...formData, apellidos: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label htmlFor="email" className="text-sm text-gray-500 font-normal">
+                                            Email
+                                        </label>
+                                        <input
+                                            type="email"
+                                            id="email"
+                                            required
+                                            placeholder="ejemplo@correo.com"
+                                            className="w-full px-4 py-3 rounded-lg border-gray-200 bg-gray-50 focus:outline-none focus:border-gray-300 transition-all"
+                                            value={formData.email}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label htmlFor="telefono" className="text-sm text-gray-500 font-normal">
+                                            Teléfono
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            id="telefono"
+                                            required
+                                            placeholder="600000000"
+                                            className="w-full px-4 py-3 rounded-lg border-gray-200 bg-gray-50 focus:outline-none focus:border-gray-300 transition-all"
+                                            value={formData.telefono}
+                                            onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label htmlFor="fechaNacimiento" className="text-sm text-gray-500 font-normal">
+                                            Fecha de nacimiento
+                                        </label>
+                                        <input
+                                            type="date"
+                                            id="fechaNacimiento"
+                                            required
+                                            className="w-full px-4 py-3 rounded-lg border-gray-200 bg-gray-50 focus:outline-none focus:border-gray-300 transition-all"
+                                            value={formData.fechaNacimiento}
+                                            onChange={(e) => setFormData({ ...formData, fechaNacimiento: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label htmlFor="sexo" className="text-sm text-gray-500 font-normal">
+                                            Sexo
+                                        </label>
+                                        <select
+                                            id="sexo"
+                                            required
+                                            className="w-full px-4 py-3 rounded-lg border-gray-200 bg-gray-50 focus:outline-none focus:border-gray-300 transition-all"
+                                            value={formData.sexo}
+                                            onChange={(e) => setFormData({ ...formData, sexo: e.target.value })}
+                                        >
+                                            <option value="">Selecciona</option>
+                                            <option value="masculino">Masculino</option>
+                                            <option value="femenino">Femenino</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label htmlFor="nivel" className="text-sm text-gray-500 font-normal">
+                                            Nivel (1-10)
+                                        </label>
+                                        <div className="flex flex-col gap-1">
+                                            <input
+                                                type="range"
+                                                id="nivel"
+                                                min="1"
+                                                max="10"
+                                                className="w-full"
+                                                value={formData.nivel}
+                                                onChange={(e) => setFormData({ ...formData, nivel: e.target.value })}
+                                            />
+                                            <span className="text-center text-sm text-gray-500">
+                                                Nivel: {getNivelDescription(formData.nivel)}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label htmlFor="localidad" className="text-sm text-gray-500 font-normal">
+                                            Localidad
+                                        </label>
+                                        <LocalidadAutocomplete
+                                            value={formData.localidad}
+                                            onChange={(value) => setFormData({ ...formData, localidad: value })}
+                                            disabled={loading}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label htmlFor="password" className="text-sm text-gray-500 font-normal">
+                                            Contraseña
+                                        </label>
+                                        <input
+                                            type="password"
+                                            id="password"
+                                            required
+                                            placeholder="********"
+                                            className="w-full px-4 py-3 rounded-lg border-gray-200 bg-gray-50 focus:outline-none focus:border-gray-300 transition-all"
+                                            value={formData.password}
+                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label htmlFor="confirmPassword" className="text-sm text-gray-500 font-normal">
+                                            Confirmar contraseña
+                                        </label>
+                                        <input
+                                            type="password"
+                                            id="confirmPassword"
+                                            required
+                                            placeholder="********"
+                                            className="w-full px-4 py-3 rounded-lg border-gray-200 bg-gray-50 focus:outline-none focus:border-gray-300 transition-all"
+                                            value={formData.confirmPassword}
+                                            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                        />
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col gap-2">
-                                    <label htmlFor="localidad" className="text-sm text-gray-600">Localidad</label>
-                                    <LocalidadAutocomplete
-                                        value={formData.localidad}
-                                        onChange={(value) => setFormData({...formData, localidad: value})}
-                                        disabled={loading}
-                                    />
-                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="mt-4 bg-blue-700/85 text-white px-6 py-3.5 rounded-lg font-medium text-sm hover:bg-gray-900 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {loading ? 'Creando cuenta...' : 'Registrarse'}
+                                </button>
 
-                                <div className="flex flex-col gap-2">
-                                    <label htmlFor="password" className="text-sm text-gray-600">Contraseña</label>
-                                    <input
-                                        type="password"
-                                        id="password"
-                                        required
-                                        placeholder="********"
-                                        className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={formData.password}
-                                        onChange={(e) => setFormData({...formData, password: e.target.value})}
-                                    />
-                                </div>
-
-                                <div className="flex flex-col gap-2">
-                                    <label htmlFor="confirmPassword" className="text-sm text-gray-600">Confirmar contraseña</label>
-                                    <input
-                                        type="password"
-                                        id="confirmPassword"
-                                        required
-                                        placeholder="********"
-                                        className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={formData.confirmPassword}
-                                        onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                                    />
-                                </div>
-                            </div>
-
-                            <button 
-                                type="submit"
-                                className="bg-blue-500/80 text-white px-4 py-3 mt-6 rounded-lg font-medium text-sm hover:bg-blue-500/75 hover:cursor-pointer transition-all ease-in duration-200"
-                                disabled={loading}
-                            >
-                                {loading ? 'Cargando...' : 'Crear cuenta'}
-                            </button>
-                            <p className='text-sm text-primary/40 -mt-3 flex justify-center items-center'>
-                                ¿Ya tienes cuenta? <a href="/login" className="ml-1 text-primary hover:underline">Inicia sesión</a>
-                            </p>
-                        </form>
+                                <p className='text-sm text-gray-400 text-center'>
+                                    ¿Ya tienes una cuenta? {" "}
+                                    <a href="/login" className="text-black font-medium hover:underline">
+                                        Inicia sesión
+                                    </a>
+                                </p>
+                            </form>
+                        </div>
                     </div>
-                </motion.footer>
+                </motion.div>
             </div>
         </div>
     );
