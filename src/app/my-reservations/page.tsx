@@ -5,6 +5,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { toast } from 'react-hot-toast';
 import { formatDisplayEndTime } from '@/utils/dateUtils';
 import UserAvatar from '@/components/common/UserAvatar';
+import Spinner2 from '@/components/ui/Spinner2';
 
 interface Player {
     user_id: string;
@@ -178,7 +179,9 @@ export default function MyReservationsPage() {
     <div className="max-w-4xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Mis Reservas</h1>
       {loading ? (
-        <div>Cargando...</div>
+        <div className="flex justify-center items-center h-full">
+          <Spinner2 className="w-12 h-12" />
+        </div>
       ) : reservations.length === 0 ? (
         <div className="text-center py-8">
           <div className="text-gray-400 mb-2">
