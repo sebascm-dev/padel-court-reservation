@@ -112,7 +112,7 @@ export default function ProfilePage() {
                         />
                     </div>
 
-                    <form onSubmit={updateProfile} className="space-y-4">
+                    <form onSubmit={updateProfile} className="space-y-4 mb-16">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -211,7 +211,7 @@ export default function ProfilePage() {
 
                         <button
                             type="submit"
-                            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed relative"
+                            className="w-full bg-blue-700/85 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed relative"
                             disabled={updating}
                         >
                             {updating ? (

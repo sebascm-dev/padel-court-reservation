@@ -25,7 +25,7 @@ export default function ReservationPage() {
         const endTime = addMinutes(selectedTime, 89);
 
         try {
-            const localDateString = selectedDate.toLocaleDateString('en-CA');
+            const localDateString = selectedDate.toLocaleDateString('es-ES');
 
             // 1. Crear la reserva
             const { data: reservation, error: reservationError } = await supabase
@@ -108,7 +108,7 @@ export default function ReservationPage() {
                         id="isPrivate"
                         checked={isPrivate}
                         onChange={(e) => setIsPrivate(e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-blue-700/85 focus:ring-blue-600/60 border-gray-300 rounded"
                     />
                     <label htmlFor="isPrivate" className="text-sm text-gray-700">
                         Reserva privada (ya tengo 4 jugadores)
@@ -118,7 +118,7 @@ export default function ReservationPage() {
                 <button
                     type="submit"
                     disabled={!selectedDate || !selectedTime || loading}
-                    className="w-full bg-blue-500/80 text-white py-2 px-4 rounded-lg hover:bg-blue-700/30 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors"
+                    className="w-full bg-blue-700/85 text-white py-2 px-4 rounded-lg hover:bg-blue-700/30 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors"
                 >
                     {loading ? 'Reservando...' : 'Confirmar Reserva'}
                 </button>

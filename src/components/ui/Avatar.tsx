@@ -61,7 +61,7 @@ export default function Avatar() {
                     />
                 </div>
             ) : (
-                <div className="bg-primary text-white w-full h-full flex items-center justify-center font-bold">
+                <div className="bg-blue-700/85 text-white w-full h-full flex items-center justify-center font-bold">
                     {getInitials(userData?.nombre, userData?.apellidos)}
                 </div>
             )}

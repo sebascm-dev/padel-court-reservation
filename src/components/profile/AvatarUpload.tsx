@@ -100,7 +100,7 @@ export default function AvatarUpload({ url, onUpload, size = 150, nombre, apelli
                         />
                     </div>
                 ) : (
-                    <div className="h-full w-full flex items-center justify-center bg-blue-500 text-white font-medium text-xl">
+                    <div className="h-full w-full flex items-center justify-center bg-blue-700/85 text-white text-6xl font-bold">
                         {uploading ? (
                             <Spinner className="h-8 w-8" />
                         ) : (
@@ -110,7 +110,7 @@ export default function AvatarUpload({ url, onUpload, size = 150, nombre, apelli
                 )}
             </div>
             
-            <label className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+            <label className="cursor-pointer bg-blue-700/85 text-white px-4 py-2 rounded hover:bg-blue-600/75 transition-colors">
                 {uploading ? 'Subiendo...' : 'Cambiar avatar'}
                 <input
                     type="file"
