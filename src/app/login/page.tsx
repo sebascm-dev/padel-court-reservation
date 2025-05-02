@@ -46,53 +46,55 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="h-screen relative">
-            {/* Fondo que ocupa toda la pantalla (100vh) */}
-            <div className='fixed inset-0'>
-                <div className='absolute inset-0 bg-black/30 backdrop-blur-sm z-10'></div>
+        <div className="h-screen fixed inset-0 bg-gray-900">
+            {/* Fondo con gradiente suave */}
+            <div className='absolute inset-0'> 
+                <div className='absolute inset-0 backdrop-blur-xs z-10'></div>
                 <Image
                     src="/images/login/loginBackground.webp"
-                    alt="Logo de Padel Court Reservation"
+                    alt="Background"
                     fill
                     priority
-                    className='object-cover'
+                    sizes="100vw"
+                    className='object-cover opacity-30'
                 />
             </div>
 
             {/* Contenido principal */}
-            <div className="relative z-20 mx-auto max-w-6xl h-full flex flex-col">
-                {/* Header (40vh) */}
-                <header className='h-[40vh] relative overflow-hidden flex items-center justify-center'>
-                    <div className='relative size-36'>
+            <div className="relative z-20 mx-auto max-w-md h-full flex flex-col px-6 pt-12"> 
+                {/* Header con animación suave */}
+                <motion.header 
+                    initial={{ y: -20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.6 }}
+                    className='flex items-center justify-center mb-16' 
+                >
+                    <div className='relative size-20'> 
                         <Image
                             src="/images/login/favicon.webp"
-                            alt="Logo de Padel Court Reservation"
+                            alt="Logo"
                             fill
                             priority
-                            className='object-contain'
+                            className='object-contain drop-shadow-lg'
                         />
                     </div>
-                </header>
+                </motion.header>
 
-                {/* Footer (60vh) */}
-                <motion.footer
-                    initial={{ y: "100%" }}
-                    animate={{ y: 0 }}
-                    transition={{
-                        type: "spring",
-                        damping: 25,
-                        stiffness: 180,
-                        duration: 0.3
-                    }}
-                    className='h-[60vh] relative z-10 overflow-hidden rounded-t-[2.5rem] bg-background'
+                {/* Contenedor del formulario */}
+                <motion.div
+                    initial={{ y: 40, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 0.6 }}
+                    className='flex-1 relative z-10 max-h-[500px]'
                 >
-                    <div className='flex flex-col gap-4 p-6 pb-8'>
+                    <div className='bg-white/85 backdrop-blur-xl rounded-3xl p-8 shadow-xl'> 
+                        <h1 className='text-xl font-medium text-gray-800 mb-4 text-center'>
+                            Bienvenido de nuevo
+                        </h1>
 
-                        <h1 className='text-2xl text-gray-800 font-semibold mt-2 mb-1'>Inicia Sesión con:</h1>
-
-                        <form onSubmit={handleSubmit} className="flex flex-col gap-4 -mt-2">
-                            <div className="flex flex-col gap-2">
-                                <label htmlFor="email" className="text-sm text-gray-600 font-medium">
+                        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+                            <div className="space-y-1">
+                                <label htmlFor="email" className="text-sm text-gray-600 font-medium ml-1">
                                     Correo electrónico
                                 </label>
                                 <input
@@ -100,22 +102,22 @@ export default function LoginPage() {
                                     id="email"
                                     required
                                     placeholder="ejemplo@correo.com"
-                                    className="px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 />
                             </div>
 
-                            <div className="flex flex-col gap-2">
-                                <label htmlFor="password" className="text-sm text-gray-600 font-medium">
+                            <div className="space-y-1">
+                                <label htmlFor="password" className="text-sm text-gray-600 font-medium ml-1">
                                     Contraseña
                                 </label>
                                 <input
                                     type="password"
                                     id="password"
                                     required
-                                    placeholder="********"
-                                    className="px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                                    placeholder="••••••••"
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                 />
@@ -124,16 +126,20 @@ export default function LoginPage() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="bg-primary text-white px-4 py-3 rounded-lg font-medium text-sm hover:bg-primary/75 hover:cursor-pointer transition-all ease-in duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="mt-3 bg-blue-500/80 text-white px-6 py-3 rounded-xl font-medium text-sm hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25" 
                             >
                                 {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                             </button>
-                            <p className='text-sm text-primary/40 -mt-3 flex justify-center items-center'>
-                                ¿No tienes cuenta? <a href="/register" className="ml-1 text-primary hover:underline">Registrarse</a>
+
+                            <p className='text-sm text-gray-500 mt-4 text-center'>
+                                ¿No tienes cuenta? {" "}
+                                <a href="/register" className="text-primary font-medium hover:underline">
+                                    Crear cuenta
+                                </a>
                             </p>
                         </form>
                     </div>
-                </motion.footer>
+                </motion.div>
             </div>
         </div>
     );
