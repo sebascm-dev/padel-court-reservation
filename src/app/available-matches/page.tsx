@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { formatDisplayEndTime } from '@/utils/dateUtils';
 import UserAvatar from '@/components/common/UserAvatar';
+import Spinner2 from '@/components/ui/Spinner2';
 
 // Añade estas funciones de utilidad al principio del archivo, después de los imports
 const getLocalISOString = (date: Date) => {
@@ -229,7 +230,7 @@ export default function AvailableMatchesPage() {
             <h1 className="text-2xl font-bold mb-6">Partidos Disponibles</h1>
             
             {loading ? (
-                <div className="text-center">Cargando partidos...</div>
+                <div className="text-center"></div>
             ) : reservations.length === 0 ? (
                 <div className="text-center py-8">
                     <div className="text-gray-400 mb-2">
@@ -470,6 +471,11 @@ export default function AvailableMatchesPage() {
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+            {loading && (
+                <div className="flex justify-center items-center h-full">
+                    <Spinner2 className="w-12 h-12" />
                 </div>
             )}
         </div>
