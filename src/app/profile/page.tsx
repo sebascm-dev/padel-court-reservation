@@ -4,10 +4,11 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
 import AvatarUpload from '@/components/profile/AvatarUpload';
-import Spinner from '@/components/ui/Spinner';
+import Spinner2 from '@/components/ui/Spinner2';
 import toast from 'react-hot-toast';
 import LocalidadAutocomplete from '@/components/ui/LocalidadAutocomplete';
 import { getNivelDescription } from '@/utils/nivelPadel';
+import Spinner1 from '@/components/ui/Spinner';
 
 interface ProfileData {
     id?: string;
@@ -98,7 +99,7 @@ export default function ProfilePage() {
             
             {loading ? (
                 <div className="flex justify-center items-center min-h-[400px]">
-                    <Spinner className="h-8 w-8" />
+                    <Spinner2 className='size-12'/>
                 </div>
             ) : (
                 <>
@@ -216,7 +217,7 @@ export default function ProfilePage() {
                         >
                             {updating ? (
                                 <div className="flex items-center justify-center">
-                                    <Spinner className="h-5 w-5 mr-2" />
+                                    <Spinner1 className="h-5 w-5 mr-2" />
                                     <span>Actualizando...</span>
                                 </div>
                             ) : (
@@ -224,6 +225,12 @@ export default function ProfilePage() {
                             )}
                         </button>
                     </form>
+
+                    {loading && (
+                        <div className="flex justify-center items-center h-full">
+                            <Spinner2 className="w-12 h-12" />
+                        </div>
+                    )}
                 </>
             )}
         </div>
