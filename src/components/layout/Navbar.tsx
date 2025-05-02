@@ -75,7 +75,12 @@ const Navbar = () => {
                 <div className="flex justify-between items-center h-16">
                     {/* Logo en la barra de navegación */}
                     <div className="flex items-center gap-2">
-                        <Avatar />
+                        <div 
+                            onClick={() => handleNavigation('/profile')}
+                            className="cursor-pointer"
+                        >
+                            <Avatar />
+                        </div>
                     </div>
 
                     {/* Botón hamburguesa */}
