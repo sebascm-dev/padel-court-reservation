@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
+import Spinner2 from '@/components/ui/Spinner2';
 
 interface TimeSlotPickerProps {
     selectedTime: string | null;
@@ -105,13 +106,17 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
     if (isDateTooFarAhead(date)) {
         return (
             <div className="text-center text-red-500">
-                No se pueden hacer reservas con más de 15 días de antelación
+                No se pueden hacer reservas con más de 15 días de antelación.
             </div>
         );
     }
 
     if (loading) {
-        return <div className="text-center text-gray-500">Cargando horarios disponibles...</div>;
+        return (
+            <div className="flex justify-center items-center py-4">
+                <Spinner2 className="w-12 h-12" />
+            </div>
+        );
     }
 
     return (
