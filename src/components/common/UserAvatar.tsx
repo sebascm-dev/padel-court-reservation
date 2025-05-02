@@ -32,7 +32,7 @@ const UserAvatar = ({ nombre, apellidos, avatarUrl, size = 'md', className = '' 
     }
 
     return (
-        <div className={`rounded-full flex items-center justify-center bg-primary text-white font-bold text-xl
+        <div className={`rounded-full flex items-center justify-center bg-blue-500/80 text-white font-bold text-xl
             ${sizeClasses[size]} ${className}`}>
             {getInitials()}
         </div>

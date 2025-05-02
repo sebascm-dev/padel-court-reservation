@@ -94,7 +94,7 @@ export default function RegisterPage() {
                         </p>
                         <button
                             onClick={() => router.push('/login')}
-                            className="mt-4 bg-primary text-white px-4 py-2 rounded-lg"
+                            className="mt-4 bg-blue-500/80 text-white px-4 py-2 rounded-lg"
                         >
                             Ir al inicio de sesión
                         </button>
@@ -280,7 +280,7 @@ export default function RegisterPage() {
 
                             <button 
                                 type="submit"
-                                className="bg-primary text-white px-4 py-3 mt-6 rounded-lg font-medium text-sm hover:bg-primary/75 hover:cursor-pointer transition-all ease-in duration-200"
+                                className="bg-blue-500/80 text-white px-4 py-3 mt-6 rounded-lg font-medium text-sm hover:bg-blue-500/75 hover:cursor-pointer transition-all ease-in duration-200"
                                 disabled={loading}
                             >
                                 {loading ? 'Cargando...' : 'Crear cuenta'}

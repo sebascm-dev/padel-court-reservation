@@ -121,7 +121,7 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
                 
                 let buttonStyle = '';
                 if (selectedTime === time) {
-                    buttonStyle = 'bg-primary text-white border-2 border-blue-700/30';
+                    buttonStyle = 'bg-blue-500/80 text-white border-2 border-blue-700/30';
                 } else if (isReserved) {
                     if (isMyReservation) {
                         buttonStyle = 'bg-green-100 text-green-800 border-2 border-green-500';
