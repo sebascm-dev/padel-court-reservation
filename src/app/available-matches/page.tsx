@@ -49,14 +49,7 @@ export default function AvailableMatchesPage() {
 
     const fetchReservations = async () => {
         try {
-            const now = new Date();
-            const today = getLocalISOString(now);
-            const currentTime = now.toLocaleTimeString('es-ES', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            });
-
+            // Quitamos la obtención de fecha y hora actual ya que no las usaremos
             const { data: reservationsData, error: reservationsError } = await supabase
                 .from('reservations')
                 .select(`
@@ -69,24 +62,16 @@ export default function AvailableMatchesPage() {
                     )
                 `)
                 .eq('is_private', false)
-                .gte('date', today) // Solo fechas desde hoy
-                .order('date', { ascending: true }) // Ordenar por fecha ascendente
-                .order('start_time', { ascending: true }); // Ordenar por hora ascendente
+                // Quitamos el filtro por fecha
+                .order('date', { ascending: true })
+                .order('start_time', { ascending: true });
 
             if (reservationsError) throw reservationsError;
 
             if (reservationsData) {
-                // Filtrar las reservas del día actual que ya han pasado
-                const filteredReservations = reservationsData.filter(reservation => {
-                    if (reservation.date > today) return true;
-                    if (reservation.date === today) {
-                        return reservation.start_time > currentTime;
-                    }
-                    return false;
-                });
-
+                // Quitamos el filtrado y usamos directamente reservationsData
                 const reservationsWithPlayers = await Promise.all(
-                    filteredReservations.map(async (reservation) => {
+                    reservationsData.map(async (reservation) => {
                         const { data: players, error: playersError } = await supabase
                             .from('reservation_players')
                             .select(`
