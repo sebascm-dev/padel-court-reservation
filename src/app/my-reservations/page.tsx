@@ -47,22 +47,15 @@ export default function MyReservationsPage() {
 
   const fetchUserReservations = async () => {
     try {
-        const now = new Date();
-        const today = getLocalISOString(now);
-        const currentTime = now.toLocaleTimeString('es-ES', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        });
-
         // 1. Obtener las reservas creadas por el usuario
         const { data: ownedReservations, error: ownedError } = await supabase
             .from('reservations')
             .select('*')
             .eq('user_id', session?.user.id)
-            .gte('date', today) // Filtrar por fecha actual o posterior
             .order('date', { ascending: true })
             .order('start_time', { ascending: true });
+
+        console.log('Owned reservations sin filtro:', ownedReservations);
 
         if (ownedError) throw ownedError;
 
@@ -72,6 +65,8 @@ export default function MyReservationsPage() {
             .select('reservation_id')
             .eq('user_id', session?.user.id);
 
+        console.log('Joined reservation IDs sin filtro:', joinedReservationsIds);
+
         if (joinedError) throw joinedError;
 
         // 3. Obtener los detalles de las reservas donde el usuario es jugador
@@ -80,29 +75,24 @@ export default function MyReservationsPage() {
             .from('reservations')
             .select('*')
             .in('id', joinedIds)
-            .gte('date', today) // Filtrar por fecha actual o posterior
             .order('date', { ascending: true })
             .order('start_time', { ascending: true });
 
+        console.log('Joined reservations sin filtro:', joinedReservations);
+
         if (joinedDetailsError) throw joinedDetailsError;
 
-        // 4. Combinar y filtrar las reservas
-        const uniqueReservations = Array.from(new Map(
-            [...(ownedReservations || []), ...(joinedReservations || [])]
-                .filter(reservation => {
-                    // Filtrar reservas pasadas del día actual
-                    if (reservation.date > today) return true;
-                    if (reservation.date === today) {
-                        return reservation.start_time > currentTime;
-                    }
-                    return false;
-                })
-                .map(item => [item.id, item])
-        ).values());
-
+        // Combinar todas las reservas sin filtrado
+        const allReservations = Array.from(
+            new Map(
+                [...(ownedReservations || []), ...(joinedReservations || [])]
+                    .map(item => [item.id, item])
+            ).values()
+        );
+        
         // 5. Obtener los jugadores para cada reserva
         const reservationsWithPlayers = await Promise.all(
-            uniqueReservations.map(async (reservation) => {
+            allReservations.map(async (reservation) => {
                 const { data: players, error: playersError } = await supabase
                     .from('reservation_players')
                     .select(`
