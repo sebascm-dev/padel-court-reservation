@@ -64,32 +64,74 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
                 return;
             }
 
-            const dateString = date.toLocaleDateString('en-CA');
+            // Formatear la fecha en el formato AAAA-DD-MM que usa Supabase
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            const dateString = `${year}-${day}-${month}`;
+            
+            console.log('Fecha formateada para Supabase:', dateString);
             
             const { data: reservations, error } = await supabase
                 .from('reservations')
-                .select('start_time, user_id')
+                .select(`
+                    id,
+                    date,
+                    start_time,
+                    end_time,
+                    user_id,
+                    is_private
+                `)
                 .eq('date', dateString);
 
             if (error) throw error;
 
+            console.log('Fecha seleccionada:', dateString);
+            console.log('Reservas encontradas:', reservations);
+            console.log('Usuario actual:', session?.user.id);
+
             const allSlots = generateTimeSlots();
             
-            // Crear un mapa de horarios reservados
-            const reservedTimesMap = new Map(
-                reservations?.map(r => [
-                    r.start_time.slice(0, 5),
-                    { isReserved: true, userId: r.user_id }
-                ]) || []
-            );
+            // Modificamos el mapa de reservas
+            const reservedTimesMap = new Map();
+            
+            reservations?.forEach(reservation => {
+                const timeKey = reservation.start_time.slice(0, 5);
+                const isCurrentUser = reservation.user_id === session?.user.id;
+                
+                console.log('Procesando reserva:', {
+                    time: timeKey,
+                    userId: reservation.user_id,
+                    currentUser: session?.user.id,
+                    isCurrentUser
+                });
 
-            // Filtrar las horas pasadas y actualizar los slots disponibles
+                reservedTimesMap.set(timeKey, {
+                    isReserved: true,
+                    userId: reservation.user_id,
+                    isMyReservation: isCurrentUser
+                });
+            });
+
             const currentSlots = allSlots.filter(time => !isTimeSlotPassed(time));
             
-            const availableTimes = currentSlots.map(time => ({
-                time,
-                ...reservedTimesMap.get(time) || { isReserved: false, userId: null }
-            }));
+            const availableTimes = currentSlots.map(time => {
+                const slotInfo = reservedTimesMap.get(time) || { 
+                    isReserved: false, 
+                    userId: null,
+                    isMyReservation: false 
+                };
+                
+                console.log('Slot final:', {
+                    time,
+                    ...slotInfo
+                });
+
+                return {
+                    time,
+                    ...slotInfo
+                };
+            });
 
             setAvailableSlots(availableTimes);
         } catch (error) {
@@ -122,6 +164,15 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
     return (
         <div className="grid grid-cols-1 gap-2">
             {availableSlots.map(({ time, isReserved, userId }) => {
+                // Añadir console.log para verificar los valores
+                console.log('Slot:', {
+                    time,
+                    isReserved,
+                    userId,
+                    currentUser: session?.user.id,
+                    isMyReservation: isReserved && userId === session?.user.id
+                });
+
                 const isMyReservation = isReserved && userId === session?.user.id;
                 
                 let buttonStyle = '';
