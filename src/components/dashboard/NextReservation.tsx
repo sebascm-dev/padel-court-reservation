@@ -144,7 +144,7 @@ export default function NextReservation() {
     <div>
       <h2 className="text-sm font-semibold">Tu Próxima Reserva</h2>
 
-      <div className="relative bg-gray-50 rounded-lg p-4 h-36 w-[75%] border border-gray-200">
+      <div className="relative bg-gray-50 rounded-lg p-4 h-36 border border-gray-200">
         {/* Pill estado */}
         <div className="absolute top-4 left-4">
           <span
