@@ -41,17 +41,13 @@ export function getLocalISOString(date: Date): string {
     return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString();
 }
 
-export function formatDateToSpanish(date: string | Date): string {
-    if (typeof date === 'string') {
-        // Asumimos que viene en formato aaaa-dd-mm de Supabase
-        const [year, day, month] = date.split('-');
-        return `${day}-${month}-${year}`;
-    }
+export function formatDateToSpanish(date: string, startTime: string, endTime: string): string {
+    const [year, day, month] = date.split('-');
+    const formattedDate = new Date(`${year}-${month}-${day}T00:00:00`);
     
-    // Si es un objeto Date
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
+    const dayNumber = parseInt(day);
+    const monthName = formattedDate.toLocaleString('es-ES', { month: 'long' });
+    const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
     
-    return `${day}-${month}-${year}`;
+    return `${dayNumber} de ${capitalizedMonth}`;
 }

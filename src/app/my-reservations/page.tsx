@@ -201,12 +201,15 @@ export default function MyReservationsPage() {
                             className="border rounded-lg p-4 bg-white shadow-sm relative"
                         >
                             {/* Header con fecha/hora y tipo */}
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="text-lg">
-                                    {formatDateToSpanish(reservation.date)} - {reservation.start_time.slice(0, 5)} a {formatDisplayEndTime(reservation.end_time)}
+                            <div className="flex justify-between items-start mb-2">
+                                <div className="text-lg flex items-center">
+                                    <span>{formatDateToSpanish(reservation.date, reservation.start_time, reservation.end_time)}</span>
+                                    <span className="text-xs text-gray-500/85 mt-0.5 ml-2">
+                                        ({reservation.start_time.slice(0, 5)} a {formatDisplayEndTime(reservation.end_time)})
+                                    </span>
                                 </div>
                                 <span className={`px-3 py-1 rounded-full text-sm font-medium
-                        ${reservation.is_private
+                                    ${reservation.is_private 
                                         ? 'bg-purple-100 text-purple-700'
                                         : 'bg-green-100 text-green-700'}`}
                                 >
@@ -217,7 +220,7 @@ export default function MyReservationsPage() {
                             {/* Estado del usuario y lista de jugadores solo si NO es privada */}
                             {!reservation.is_private && (
                                 <>
-                                    <div className="flex items-center gap-2 text-sm mb-3">
+                                    <div className="flex items-center gap-2 text-sm">
                                         {reservation.isOwner ? (
                                             <span className="text-green-600 font-medium">Creador</span>
                                         ) : (
