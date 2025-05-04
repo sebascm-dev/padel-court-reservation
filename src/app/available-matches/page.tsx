@@ -5,7 +5,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { formatDisplayEndTime } from '@/utils/dateUtils';
+import { formatDateToSpanish, formatDisplayEndTime } from '@/utils/dateUtils';
 import UserAvatar from '@/components/common/UserAvatar';
 import Spinner2 from '@/components/ui/Spinner2';
 
@@ -259,17 +259,7 @@ export default function AvailableMatchesPage() {
                             {/* Encabezado con fecha y hora */}
                             <div className="flex justify-between items-start mb-4">
                                 <h3 className="font-semibold text-lg">
-                                    {format(new Date(`${reservation.date}T00:00:00`), "EEEE, d 'de' MMMM", { 
-                                        locale: es 
-                                    })
-                                    .split(' ')
-                                    .map((word, index) => 
-                                        // Capitalizamos el día de la semana (index 0) y el mes (index 3)
-                                        index === 0 || index === 3 
-                                            ? word.charAt(0).toUpperCase() + word.slice(1)
-                                            : word
-                                    )
-                                    .join(' ')}
+                                    <span>{formatDateToSpanish(reservation.date, reservation.start_time, reservation.end_time)}</span>
                                 </h3>
                                 <span className="text-lg font-medium">
                                     {reservation.start_time.slice(0, 5)}

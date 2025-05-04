@@ -45,9 +45,11 @@ export function formatDateToSpanish(date: string, startTime: string, endTime: st
     const [year, day, month] = date.split('-');
     const formattedDate = new Date(`${year}-${month}-${day}T00:00:00`);
     
+    const weekDay = formattedDate.toLocaleString('es-ES', { weekday: 'long' });
+    const capitalizedWeekDay = weekDay.charAt(0).toUpperCase() + weekDay.slice(1);
     const dayNumber = parseInt(day);
     const monthName = formattedDate.toLocaleString('es-ES', { month: 'long' });
     const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
     
-    return `${dayNumber} de ${capitalizedMonth}`;
+    return `${capitalizedWeekDay}, ${dayNumber} de ${capitalizedMonth}`;
 }
