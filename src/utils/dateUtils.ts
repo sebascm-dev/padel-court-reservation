@@ -40,3 +40,18 @@ export function addDays(date: Date, days: number): Date {
 export function getLocalISOString(date: Date): string {
     return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString();
 }
+
+export function formatDateToSpanish(date: string | Date): string {
+    if (typeof date === 'string') {
+        // Asumimos que viene en formato aaaa-dd-mm de Supabase
+        const [year, day, month] = date.split('-');
+        return `${day}-${month}-${year}`;
+    }
+    
+    // Si es un objeto Date
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    
+    return `${day}-${month}-${year}`;
+}
