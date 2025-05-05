@@ -4,7 +4,6 @@ import { supabase } from '@/lib/supabase';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { formatDateForDB } from '@/utils/dateUtils';
 import Spinner2 from '@/components/ui/Spinner2';
 
 interface MonthlyReservations {
@@ -16,17 +15,6 @@ interface ChartData {
   reservas: number;
 }
 
-const isValidDateFormat = (dateString: string): boolean => {
-  const regex = /^\d{4}-\d{2}-\d{2}$/;
-  if (!regex.test(dateString)) {
-    console.error(`Formato de fecha inválido: ${dateString}. Debe ser AAAA-MM-DD`);
-    return false;
-  }
-  
-  const [year, month, day] = dateString.split('-').map(Number);
-  return month <= 12 && day <= 31;
-};
-
 const ReservationsCount = () => {
   const [monthlyReservations, setMonthlyReservations] = useState<MonthlyReservations>({});
   const [loading, setLoading] = useState(true);
@@ -36,7 +24,6 @@ const ReservationsCount = () => {
     const months = [];
     for (let i = 8; i >= 0; i--) {
       const date = subMonths(new Date(), i);
-      // Formatear la fecha como AAAA-MM-DD
       months.push(format(date, 'MMMM', { locale: es }));
     }
     return months;
@@ -46,9 +33,6 @@ const ReservationsCount = () => {
     const fetchReservationCount = async () => {
       try {
         if (!session?.user?.id) return;
-
-        // Obtener la fecha actual en formato AAAA-MM-DD
-        const today = formatDateForDB(new Date());
 
         // 1. Obtener las reservas creadas por el usuario
         const { data: ownedReservations, error: ownedError } = await supabase
