@@ -9,6 +9,8 @@ import { es } from 'date-fns/locale';
 import { formatDisplayEndTime, formatDateForDB } from '@/utils/dateUtils';
 import confetti from 'canvas-confetti';
 import Link from 'next/link';
+import Avatar from '@/components/ui/Avatar';
+import UserAvatar from '@/components/common/UserAvatar';
 
 interface Player {
   id: string;
@@ -311,48 +313,38 @@ export default function NextReservation() {
           </span>
         </div>
 
-        {nextReservation.is_private ? (
+        {nextReservation.is_private && (
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div className="flex flex-col items-center">
               <div className="relative mb-2">
-                <div className="size-18 rounded-full overflow-hidden relative">
-                  <img
-                    src={nextReservation.creator?.avatar_url || ''}
-                    alt={nextReservation.creator?.nombre}
-                    className="w-full h-full object-cover"
+                <div className="w-20 h-20 rounded-full overflow-hidden">
+                  <UserAvatar
+                    nombre={nextReservation.creator?.nombre || ''}
+                    apellidos={nextReservation.creator?.apellidos || ''}
+                    avatarUrl={nextReservation.creator?.avatar_url || ''}
+                    size='lg'
+                    className="border-2 border-purple-100"
                   />
                   <div className="absolute inset-0 bg-black/20" />
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <svg 
-                    className="w-8 h-8 text-gray-300/80 drop-shadow-md" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z" 
-                    />
-                  </svg>
                 </div>
               </div>
             </div>
           </div>
-        ) : (
+        )}
+
+        {!nextReservation.is_private && (
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mt-1">
             <div className="flex gap-4">
               {slots.map(i => {
                 const p = players[i];
                 return p ? (
                   <div key={i} className="text-center">
-                    <div className="aspect-square w-12">
-                      <img
-                        src={p.avatar_url || ''}
-                        alt={p.nombre}
-                        className="size-12 rounded-full object-cover border-2 border-green-100 shadow-sm"
+                    <div className="aspect-square w-12 h-12">
+                      <UserAvatar
+                        nombre={p.nombre}
+                        apellidos={p.apellidos}
+                        avatarUrl={p.avatar_url || ''}
+                        className="border-2 w-full h-full border-green-100 shadow-sm"
                       />
                     </div>
                     <span className="text-xs text-gray-500 mt-1 block">{p.nombre}</span>
