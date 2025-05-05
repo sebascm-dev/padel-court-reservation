@@ -2,7 +2,7 @@
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import NextReservation from '@/components/dashboard/NextReservation';
 import DashboardActions from '@/components/dashboard/DashboardActions';
 import ReservationsChart from '@/components/dashboard/ReservationsChart';
@@ -13,15 +13,7 @@ export default function DashboardPage() {
     const { session } = useAuth();
     const [userName, setUserName] = useState('');
 
-    useEffect(() => {
-        if (!session) {
-            router.push('/login');
-        } else {
-            fetchUserName();
-        }
-    }, [session, router]);
-
-    const fetchUserName = async () => {
+    const fetchUserName = useCallback(async () => {
         const { data: user, error } = await supabase
             .from('usuarios')
             .select('nombre')
@@ -31,12 +23,15 @@ export default function DashboardPage() {
         if (!error && user) {
             setUserName(user.nombre);
         }
-    };
+    }, [session]);
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
-        router.push('/login');
-    };
+    useEffect(() => {
+        if (!session) {
+            router.push('/login');
+        } else {
+            fetchUserName();
+        }
+    }, [session, router, fetchUserName]);
 
     if (!session) return null;
 
