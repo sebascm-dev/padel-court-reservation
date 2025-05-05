@@ -1,9 +1,9 @@
 "use client"
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { toast } from 'react-hot-toast';
-import { formatDateToSpanish, formatDisplayEndTime } from '@/utils/dateUtils';
+import { formatDateToSpanish } from '@/utils/dateUtils';
 import UserAvatar from '@/components/common/UserAvatar';
 import Spinner2 from '@/components/ui/Spinner2';
 
@@ -34,18 +34,12 @@ export default function MyReservationsPage() {
     const [reservations, setReservations] = useState<Reservation[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (session) {
-            fetchUserReservations();
-        }
-    }, [session]);
-
     const ensureCorrectDateFormat = (dateString: string): string => {
         // Verificar si ya está en formato AAAA-MM-DD
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
         if (dateRegex.test(dateString)) {
             // Verificar que el mes sea válido (1-12)
-            const [year, month, day] = dateString.split('-').map(Number);
+            const [ month ] = dateString.split('-').map(Number);
             if (month <= 12) {
                 return dateString;
             }
@@ -56,7 +50,7 @@ export default function MyReservationsPage() {
         return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     };
 
-    const fetchUserReservations = async () => {
+    const fetchUserReservations = useCallback(async () => {
         try {
             // Obtener fecha y hora actual
             const now = new Date();
@@ -174,7 +168,13 @@ export default function MyReservationsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [session]);
+
+    useEffect(() => {
+        if (session) {
+            fetchUserReservations();
+        }
+    }, [session, fetchUserReservations]);
 
     const handleDeleteReservation = async (reservationId: string) => {
         if (!confirm('¿Estás seguro de que quieres cancelar esta reserva?')) {
@@ -241,7 +241,7 @@ export default function MyReservationsPage() {
                         >
                             <div className="flex justify-between items-start mb-2">
                                 <div className="text-lg flex items-center">
-                                    <span>{formatDateToSpanish(reservation.date, reservation.start_time, reservation.end_time)}</span>
+                                    <span>{formatDateToSpanish(reservation.date)}</span>
                                     <span className="text-sm text-gray-500/85 ml-2">
                                         ({reservation.start_time.slice(0, 5)})
                                     </span>
