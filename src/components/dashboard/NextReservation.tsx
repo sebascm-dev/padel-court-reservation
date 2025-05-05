@@ -212,8 +212,16 @@ export default function NextReservation() {
 
   const [year, day, month] = date.split('-');
   const formattedDate = new Date(`${year}-${month}-${day}T00:00:00`);
-  const displayDate = format(formattedDate, "d 'de' MMMM", { locale: es })
-    .replace(/de ([a-z])/, (_, letter) => `de ${letter.toUpperCase()}`);
+
+  const displayDate = format(formattedDate, "EEEE, d 'de' MMMM", { locale: es })
+    .split(' ')
+    .map((word, index) => {
+      if (word !== 'de') {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      }
+      return word;
+    })
+    .join(' ');
 
   const avgLevel = players.length 
     ? (players.reduce((sum, p) => sum + p.nivel, 0) / players.length).toFixed(1) 
@@ -261,7 +269,7 @@ export default function NextReservation() {
 
         <div className="absolute top-3 right-4">
           <span className="text-base font-medium text-gray-700">
-            {format(formattedDate, "EEEE, d 'de' MMMM", { locale: es })}
+            {displayDate}
           </span>
         </div>
 
