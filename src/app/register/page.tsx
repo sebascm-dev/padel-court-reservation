@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import LocalidadAutocomplete from '@/components/ui/LocalidadAutocomplete';
 import { getNivelDescription } from '@/utils/nivelPadel';
+import { AuthError } from '@supabase/supabase-js';
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -67,13 +68,18 @@ export default function RegisterPage() {
             toast.success('¡Registro completado! Por favor, verifica tu email.');
             setRegistrationComplete(true);
 
-        } catch (error: any) {
+        } catch (error) {
             toast.dismiss(loadingToast);
             console.error('Error durante el registro:', error);
-            if (error.message.includes('already registered')) {
-                toast.error('Este email ya está registrado');
-            } else if (error.message.includes('weak-password')) {
-                toast.error('La contraseña es demasiado débil');
+            
+            if (error instanceof AuthError) {
+                if (error.message.includes('already registered')) {
+                    toast.error('Este email ya está registrado');
+                } else if (error.message.includes('weak-password')) {
+                    toast.error('La contraseña es demasiado débil');
+                } else {
+                    toast.error('Error durante el registro');
+                }
             } else {
                 toast.error('Error durante el registro');
             }
