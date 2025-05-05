@@ -1,9 +1,16 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
 import Spinner2 from '@/components/ui/Spinner2';
+
+interface TimeSlot {
+    time: string;
+    isReserved: boolean;
+    userId: string | null;
+    isMyReservation: boolean;
+}
 
 interface TimeSlotPickerProps {
     selectedTime: string | null;
@@ -13,20 +20,8 @@ interface TimeSlotPickerProps {
 
 export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlotPickerProps) {
     const { session } = useAuth();
-    const [availableSlots, setAvailableSlots] = useState<any[]>([]);
+    const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
     const [loading, setLoading] = useState(true);
-
-    // Función para verificar si un horario ya ha pasado
-    const isTimeSlotPassed = (time: string): boolean => {
-        const now = new Date();
-        const selectedDate = new Date(date);
-        const [hours, minutes] = time.split(':').map(Number);
-        
-        const slotDateTime = new Date(selectedDate);
-        slotDateTime.setHours(hours, minutes);
-
-        return now > slotDateTime;
-    };
 
     const isDateTooFarAhead = (selectedDate: Date): boolean => {
         const maxDate = new Date();
@@ -34,18 +29,16 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
         return selectedDate > maxDate;
     };
 
-    // Genera todos los horarios posibles de 9:30 a 21:30 cada 90 minutos
     const generateTimeSlots = () => {
         const slots: string[] = [];
-        let hour = 9; // Empezamos a las 9:30
+        let hour = 9;
         let minutes = 30;
 
-        while (hour < 22) { // Hasta las 21:30 (último turno posible)
+        while (hour < 22) {
             const formattedHour = hour.toString().padStart(2, '0');
             const formattedMinutes = minutes.toString().padStart(2, '0');
             slots.push(`${formattedHour}:${formattedMinutes}`);
 
-            // Añadimos 90 minutos
             minutes += 90;
             while (minutes >= 60) {
                 minutes -= 60;
@@ -56,22 +49,32 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
         return slots;
     };
 
-    const fetchReservedSlots = async () => {
+    const fetchReservedSlots = useCallback(async () => {
         setLoading(true);
         try {
+            const isTimeSlotPassed = (time: string): boolean => {
+                const now = new Date();
+                const selectedDate = new Date(date);
+                const [hours, minutes] = time.split(':').map(Number);
+
+                const slotDateTime = new Date(selectedDate);
+                slotDateTime.setHours(hours, minutes);
+
+                return now > slotDateTime;
+            };
+
             if (isDateTooFarAhead(date)) {
                 setAvailableSlots([]);
                 return;
             }
 
-            // Corregimos el formato de la fecha a AAAA-MM-DD
             const year = date.getFullYear();
             const month = (date.getMonth() + 1).toString().padStart(2, '0');
             const day = date.getDate().toString().padStart(2, '0');
             const dateString = `${year}-${month}-${day}`;
-            
+
             console.log('Fecha formateada para Supabase:', dateString);
-            
+
             const { data: reservations, error } = await supabase
                 .from('reservations')
                 .select(`
@@ -91,14 +94,13 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
             console.log('Usuario actual:', session?.user.id);
 
             const allSlots = generateTimeSlots();
-            
-            // Modificamos el mapa de reservas
+
             const reservedTimesMap = new Map();
-            
+
             reservations?.forEach(reservation => {
                 const timeKey = reservation.start_time.slice(0, 5);
                 const isCurrentUser = reservation.user_id === session?.user.id;
-                
+
                 console.log('Procesando reserva:', {
                     time: timeKey,
                     userId: reservation.user_id,
@@ -114,14 +116,14 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
             });
 
             const currentSlots = allSlots.filter(time => !isTimeSlotPassed(time));
-            
+
             const availableTimes = currentSlots.map(time => {
-                const slotInfo = reservedTimesMap.get(time) || { 
-                    isReserved: false, 
+                const slotInfo = reservedTimesMap.get(time) || {
+                    isReserved: false,
                     userId: null,
-                    isMyReservation: false 
+                    isMyReservation: false
                 };
-                
+
                 console.log('Slot final:', {
                     time,
                     ...slotInfo
@@ -139,11 +141,11 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
         } finally {
             setLoading(false);
         }
-    };
+    }, [date, session]);
 
     useEffect(() => {
         fetchReservedSlots();
-    }, [date]);
+    }, [fetchReservedSlots]);
 
     if (isDateTooFarAhead(date)) {
         return (
@@ -164,7 +166,6 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
     return (
         <div className="grid grid-cols-1 gap-2">
             {availableSlots.map(({ time, isReserved, userId }) => {
-                // Añadir console.log para verificar los valores
                 console.log('Slot:', {
                     time,
                     isReserved,
@@ -174,7 +175,7 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
                 });
 
                 const isMyReservation = isReserved && userId === session?.user.id;
-                
+
                 let buttonStyle = '';
                 if (selectedTime === time) {
                     buttonStyle = 'bg-blue-600/85 text-white border-2 border-blue-700/85';
