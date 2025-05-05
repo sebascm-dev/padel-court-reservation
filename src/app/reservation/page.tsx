@@ -1,5 +1,5 @@
 "use client"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
@@ -16,6 +16,15 @@ export default function ReservationPage() {
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [isPrivate, setIsPrivate] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (!session) {
+            router.push('/login');
+            return;
+        }
+    }, [session, router]);
+
+    if (!session) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
