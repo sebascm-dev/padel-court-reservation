@@ -1,0 +1,271 @@
+"use client";
+
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { formatDateToSpanish, formatDateForDB } from '@/utils/dateUtils';
+import Link from 'next/link';
+import UserAvatar from '@/components/common/UserAvatar';
+import { addDays } from 'date-fns';
+import toast from 'react-hot-toast';
+
+interface Player {
+    user_id: string;
+    usuario?: {
+        nombre: string;
+        apellidos: string;
+        avatar_url?: string;
+        nivel: number;
+    };
+}
+
+// Actualizar la interfaz Match para incluir el creador
+interface Match {
+    id: string;
+    date: string;
+    start_time: string;
+    end_time: string;
+    players: Player[];
+    usuarios: {
+        id: string;
+        nombre: string;
+        apellidos: string;
+        avatar_url?: string;
+        nivel?: number;
+    };
+}
+
+// Modificar la función calculateAverageLevel
+const calculateAverageLevel = (match: Match) => {
+    const players = match.players || [];
+    
+    // Si no hay jugadores, devolver guión
+    if (players.length === 0) return '—';
+
+    const totalLevel = players.reduce((sum, player) => {
+        return sum + (player.usuario?.nivel || 0);
+    }, 0);
+
+    // Usar el mismo formato que NextReservation
+    return (totalLevel / players.length).toFixed(1);
+};
+
+export default function UpcomingMatches() {
+    const [matches, setMatches] = useState<Match[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [joiningMatch, setJoiningMatch] = useState<string | null>(null);
+    const { session } = useAuth();
+
+    const fetchUpcomingMatches = async () => {
+        try {
+            const now = new Date();
+            const today = formatDateForDB(now);
+            const tomorrow = formatDateForDB(addDays(now, 1));
+            const currentTime = now.toLocaleTimeString('es-ES', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+
+            // Obtener partidos de hoy y mañana
+            const { data: matchesData, error } = await supabase
+                .from('reservations')
+                .select(`
+                    *,
+                    usuarios (
+                        id,
+                        nombre,
+                        apellidos,
+                        avatar_url,
+                        nivel
+                    )
+                `)
+                .eq('is_private', false)
+                .gte('date', today)
+                .lte('date', tomorrow)
+                .order('date', { ascending: true })
+                .order('start_time', { ascending: true });
+
+            if (error) throw error;
+
+            if (matchesData) {
+                // Filtrar partidos que no han terminado y no están completos
+                const availableMatches = await Promise.all(
+                    matchesData
+                        .filter(match => {
+                            if (match.date > today) return true;
+                            return match.date === today && match.end_time > currentTime;
+                        })
+                        .map(async (match) => {
+                            // Obtener jugadores de cada partido
+                            const { data: players } = await supabase
+                                .from('reservation_players')
+                                .select(`
+                                    user_id,
+                                    usuario:user_id (
+                                        nombre,
+                                        apellidos,
+                                        avatar_url,
+                                        nivel
+                                    )
+                                `)
+                                .eq('reservation_id', match.id);
+
+                            return {
+                                ...match,
+                                players: players || []
+                            };
+                        })
+                );
+
+                // Filtrar solo partidos no completos y tomar los 5 primeros
+                setMatches(availableMatches
+                    .filter(match => match.players.length < 4)
+                    .slice(0, 5)
+                );
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleJoinMatch = async (matchId: string) => {
+        try {
+            if (!session?.user.id) return;
+
+            const toastLoading = toast.loading('Uniéndote al partido...');
+
+            // Verificar si ya estamos en el partido
+            const { data: existingPlayer } = await supabase
+                .from('reservation_players')
+                .select('*')
+                .eq('reservation_id', matchId)
+                .eq('user_id', session.user.id)
+                .single();
+
+            if (existingPlayer) {
+                toast.dismiss(toastLoading);
+                toast.error('Ya estás inscrito en este partido');
+                return;
+            }
+
+            // Unirse al partido
+            const { error } = await supabase
+                .from('reservation_players')
+                .insert({
+                    reservation_id: matchId,
+                    user_id: session.user.id
+                });
+
+            if (error) throw error;
+
+            toast.dismiss(toastLoading);
+            toast.success('¡Te has unido al partido!');
+            fetchUpcomingMatches(); // Actualizar la lista
+        } catch (error) {
+            console.error('Error al unirse al partido:', error);
+            toast.error('Error al unirse al partido');
+        } finally {
+            setJoiningMatch(null);
+        }
+    };
+
+    const filteredPlayers = (match: Match) => {
+        // Filtrar jugadores excluyendo al creador
+        return match.players.filter(player => player.user_id !== match.usuarios.id);
+    };
+
+    useEffect(() => {
+        fetchUpcomingMatches();
+    }, []);
+
+    if (loading) return null;
+
+    if (matches.length === 0) {
+        return (
+            <div className="bg-white rounded-lg shadow-md p-4">
+                <h2 className="text-lg font-semibold mb-2">Partidos Disponibles</h2>
+                <p className="text-gray-500 text-sm">No hay partidos disponibles para hoy o mañana</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-white rounded-lg shadow-md p-4">
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">Partidos Disponibles</h2>
+                <Link 
+                    href="/available-matches"
+                    className="text-sm text-blue-500 hover:text-blue-600"
+                >
+                    Ver todos
+                </Link>
+            </div>
+
+            <div className="space-y-4">
+                {matches.map((match) => (
+                    <div key={match.id} className="flex justify-between items-center p-3 border rounded-lg overflow-hidden">
+                        <div>
+                            <div className="text-gray-900 font-medium mb-1">
+                                {formatDateToSpanish(match.date, match.start_time, match.end_time)}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                                Nivel: {calculateAverageLevel(match)} · {match.start_time.slice(0, 5)}
+                            </div>
+                        </div>
+
+                        <div className="flex items-center">
+                            <div className="relative mr-16"> {/* Añadido margen derecho */}
+                                {/* Círculo grande del creador */}
+                                <UserAvatar
+                                    nombre={match.usuarios?.nombre || ''}
+                                    apellidos={match.usuarios?.apellidos || ''}
+                                    avatarUrl={match.usuarios?.avatar_url}
+                                    className="w-14 h-14 border-2 border-blue-100 shadow-sm rounded-full"
+                                />
+                                
+                                {/* Círculos pequeños elevados */}
+                                <div className="absolute -top-1 -right-18 flex -space-x-1">
+                                    {Array.from({ length: 3 }).map((_, i) => {
+                                        const players = filteredPlayers(match);
+                                        const player = players[i];
+                                        return (
+                                            <button 
+                                                key={`slot-${i}`}
+                                                onClick={() => {
+                                                    if (!player && confirm('¿Quieres unirte a este partido?')) {
+                                                        handleJoinMatch(match.id);
+                                                    }
+                                                }}
+                                                className={`w-8 h-8 rounded-full border-2 border-white 
+                                                          flex items-center justify-center transition-colors overflow-hidden
+                                                          ${player ? 
+                                                            'border-green-200' : 
+                                                            'bg-gray-100 hover:bg-blue-50 hover:border-blue-200'}`}
+                                                title={player ? player.usuario?.nombre : "Unirte al partido"}
+                                                disabled={!!player}
+                                            >
+                                                {player ? (
+                                                    <UserAvatar
+                                                        nombre={player.usuario?.nombre || ''}
+                                                        apellidos={player.usuario?.apellidos || ''}
+                                                        avatarUrl={player.usuario?.avatar_url}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <span className="text-[10px] text-gray-400 hover:text-blue-500">+</span>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
