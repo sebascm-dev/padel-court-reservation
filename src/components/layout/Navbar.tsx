@@ -3,12 +3,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/components/auth/AuthProvider'; // Cambiado el import
 import Link from 'next/link';
 import Image from 'next/image';
-import Avatar from '@/components/ui/Avatar';
+import UserAvatar from '@/components/common/UserAvatar';
 
 const Navbar = () => {
+    const { session } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
+    const [userData, setUserData] = useState<{
+        nombre: string;
+        apellidos: string;
+        avatar_url: string | null;
+    } | null>(null);
     const router = useRouter();
     const menuRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
@@ -30,6 +37,31 @@ const Navbar = () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            if (!session?.user?.id) return; // Verificar que existe session.user.id
+
+            const { data, error } = await supabase
+                .from('usuarios')
+                .select('nombre, apellidos, avatar_url')
+                .eq('id', session.user.id)
+                .single();
+
+            if (error) {
+                console.error('Error al obtener datos del usuario:', error);
+                return;
+            }
+
+            if (data) {
+                setUserData(data);
+            }
+        };
+
+        if (session) {
+            fetchUserData();
+        }
+    }, [session]); // Dependencia de session
 
     const handleNavigation = (path: string) => {
         setIsOpen(false);
@@ -73,14 +105,21 @@ const Navbar = () => {
         <nav className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
             <div className="max-w-7xl mx-auto px-4">
                 <div className="flex justify-between items-center h-16">
-                    {/* Logo en la barra de navegación */}
                     <div className="flex items-center gap-2">
-                        <div 
-                            onClick={() => handleNavigation('/profile')}
-                            className="cursor-pointer"
-                        >
-                            <Avatar />
-                        </div>
+                        {session && userData && ( // Verificar que existe session y userData
+                            <div 
+                                onClick={() => handleNavigation('/profile')}
+                                className="cursor-pointer"
+                            >
+                                <UserAvatar
+                                    nombre={userData.nombre}
+                                    apellidos={userData.apellidos}
+                                    avatarUrl={userData.avatar_url || ''}
+                                    size="sm"
+                                    className="border-2 border-blue-100 shadow-sm"
+                                />
+                            </div>
+                        )}
                     </div>
 
                     {/* Botón hamburguesa */}
