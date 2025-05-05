@@ -3,12 +3,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
-import AvatarUpload from '@/components/profile/AvatarUpload';
 import Spinner2 from '@/components/ui/Spinner2';
 import toast from 'react-hot-toast';
 import LocalidadAutocomplete from '@/components/ui/LocalidadAutocomplete';
 import { getNivelDescription } from '@/utils/nivelPadel';
 import Spinner1 from '@/components/ui/Spinner';
+import UserAvatar from '@/components/common/UserAvatar';
 
 interface ProfileData {
     id?: string;
@@ -103,14 +103,32 @@ export default function ProfilePage() {
                 </div>
             ) : (
                 <>
-                    <div className="mb-8 flex justify-center">
-                        <AvatarUpload 
-                            url={profile.avatar_url}
-                            onUpload={handleAvatarUpload}
-                            size={150}
-                            nombre={profile.nombre}
-                            apellidos={profile.apellidos}
+                    <div className="mb-6 flex flex-col items-center gap-4">
+                        <UserAvatar
+                            nombre={profile.nombre || ''}
+                            apellidos={profile.apellidos || ''}
+                            avatarUrl={profile.avatar_url || ''}
+                            className="border-4 w-32 h-32 border-blue-100 shadow-lg"
                         />
+                        <button
+                            onClick={() => {/* lógica para cambiar avatar */}}
+                            className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-2"
+                        >
+                            <svg 
+                                className="w-4 h-4" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24"
+                            >
+                                <path 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    strokeWidth={2} 
+                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" 
+                                />
+                            </svg>
+                            Cambiar foto
+                        </button>
                     </div>
 
                     <form onSubmit={updateProfile} className="space-y-4 mb-16">
