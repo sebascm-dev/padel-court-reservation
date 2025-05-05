@@ -193,7 +193,7 @@ export default function UpcomingMatches() {
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-md p-4">
+        <div className="">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Partidos Disponibles</h2>
                 <Link 
@@ -221,7 +221,7 @@ export default function UpcomingMatches() {
                                 }
                             }
                         }}
-                        className={`flex justify-between items-center p-3 border rounded-lg overflow-hidden
+                        className={`flex justify-between items-center p-3 border border-gray-500/30 rounded-lg overflow-hidden bg-white shadow-md
                                   ${match.players.length < 4 && 
                                     !match.players.some(p => p.user_id === session?.user.id) && 
                                     match.usuarios.id !== session?.user.id
