@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import NextReservation from '@/components/dashboard/NextReservation';
 import DashboardActions from '@/components/dashboard/DashboardActions';
 import ReservationsChart from '@/components/dashboard/ReservationsChart';
+import UpcomingMatches from '@/components/dashboard/UpcomingMatches';
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -63,13 +64,17 @@ export default function DashboardPage() {
                 </div>
             </div>
             
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-5 mb-16">
                 <div>
                     <NextReservation />
                 </div>
                 
                 <div>
                     <DashboardActions />
+                </div>
+                
+                <div className='mt-4'>
+                    <UpcomingMatches />
                 </div>
 
                 <div className='mt-4'>
