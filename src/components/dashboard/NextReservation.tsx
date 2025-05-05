@@ -22,12 +22,20 @@ interface Reservation {
   start_time: string;
   end_time: string;
   players: Player[];
+  is_private?: boolean;
+  creator?: {
+    id: string;
+    nombre: string;
+    apellidos: string;
+    avatar_url: string | null;
+  };
 }
 
 export default function NextReservation() {
   const { session } = useAuth();
   const [nextReservation, setNextReservation] = useState<Reservation | null>(null);
   const [loading, setLoading] = useState(true);
+  const [timeLeft, setTimeLeft] = useState('');
 
   const fetchNextReservation = async () => {
     try {
@@ -92,10 +100,26 @@ export default function NextReservation() {
         `)
         .eq('reservation_id', next.id);
 
+      const { data: reservationWithUser } = await supabase
+        .from('reservations')
+        .select(`
+          *,
+          usuarios (
+            id,
+            nombre,
+            apellidos,
+            avatar_url
+          )
+        `)
+        .eq('id', next.id)
+        .single();
+
       setNextReservation({
         ...next,
-        players: playersRaw?.map(p => p.usuarios) || []
+        players: playersRaw?.map(p => p.usuarios) || [],
+        creator: reservationWithUser.usuarios
       });
+
       setLoading(false);
     } catch (e) {
       console.error(e);
@@ -106,6 +130,41 @@ export default function NextReservation() {
   useEffect(() => {
     fetchNextReservation();
   }, [session]);
+
+  useEffect(() => {
+    if (!nextReservation) return;
+
+    const timer = setInterval(() => {
+      // Construimos la fecha de reserva correctamente
+      const [year, day, month] = nextReservation.date.split('-');
+      const [hours, minutes] = nextReservation.start_time.split(':');
+      
+      const reservationDate = new Date(
+        parseInt(year),
+        parseInt(month) - 1, // Los meses en JS son 0-based
+        parseInt(day),
+        parseInt(hours),
+        parseInt(minutes)
+      );
+
+      const now = new Date();
+      const diff = reservationDate.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        setTimeLeft('¡Hora de jugar!');
+        clearInterval(timer);
+        return;
+      }
+
+      const hours_left = Math.floor(diff / (1000 * 60 * 60));
+      const minutes_left = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds_left = Math.floor((diff % (1000 * 60)) / 1000);
+
+      setTimeLeft(`${hours_left}h ${minutes_left}m ${seconds_left}s`);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [nextReservation]);
 
   if (loading) {
     return (
@@ -144,16 +203,19 @@ export default function NextReservation() {
     <div>
       <h2 className="text-xl font-bold mb-2">Tu Próxima Reserva</h2>
 
-      {/* Reducimos la altura y el padding */}
-      <div className="relative bg-white rounded-xl p-6 border border-gray-200 shadow-md h-[160px]">
+      <div className={`relative bg-white rounded-xl p-6 border border-gray-200 shadow-md h-[160px]
+        ${nextReservation.is_private ? 'bg-gradient-to-br from-purple-50 to-white' : ''}`}>
+        
         {/* Pill estado - ajustamos posición */}
         <div className="absolute top-3 left-4">
           <span className={`px-3 py-1 rounded-full text-sm font-medium border
-            ${players.length < 4 
-              ? 'bg-green-50 text-green-700 border-green-200' 
-              : 'bg-red-50 text-red-700 border-red-200'}`}
+            ${nextReservation.is_private 
+              ? 'bg-purple-100 text-purple-700 border-purple-200' 
+              : players.length < 4 
+                ? 'bg-green-50 text-green-700 border-green-200' 
+                : 'bg-red-50 text-red-700 border-red-200'}`}
           >
-            {players.length < 4 ? 'Abierta' : 'Completa'}
+            {nextReservation.is_private ? 'Privada' : players.length < 4 ? 'Abierta' : 'Completa'}
           </span>
         </div>
 
@@ -164,44 +226,78 @@ export default function NextReservation() {
           </span>
         </div>
 
-        {/* Círculos - ajustamos para que sean perfectamente redondos */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mt-1">
-          <div className="flex gap-8"> {/* Reducimos el gap de 6 a 4 */}
-            {slots.map(i => {
-              const p = players[i];
-              return p ? (
-                <div key={i} className="text-center flex flex-col items-center justify-center">
-                  <div className="aspect-square w-12"> {/* Reducimos w-14 a w-12 */}
-                    <img
-                      src={p.avatar_url || ''}
-                      alt={p.nombre}
-                      className="size-12 rounded-full object-cover border-2 border-green-100 shadow-sm"
+        {nextReservation.is_private ? (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="flex flex-col items-center">
+              <div className="relative mb-2">
+                {/* Avatar con overlay */}
+                <div className="size-16 rounded-full overflow-hidden relative">
+                  <img
+                    src={nextReservation.creator?.avatar_url || ''}
+                    alt={nextReservation.creator?.nombre}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/20" />
+                </div>
+                {/* Candado superpuesto */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <svg 
+                    className="w-8 h-8 text-purple-300/80 drop-shadow-md" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z" 
                     />
-                  </div>
-                  <span className="text-xs text-gray-500 mt-1 block">{p.nombre}</span> {/* Reducimos mt-1.5 a mt-1 */}
+                  </svg>
                 </div>
-              ) : (
-                <div key={i} className="text-center">
-                  <div className="aspect-square w-12"> {/* Reducimos w-14 a w-12 */}
-                    <div className="size-12 rounded-full bg-gray-50 border-2 border-gray-100 
-                                flex items-center justify-center shadow-sm">
-                      <span className="text-gray-400 text-sm">+</span>
-                    </div>
-                  </div>
-                  <span className="text-xs text-gray-400 mt-1 block">Libre</span> {/* Reducimos mt-1.5 a mt-1 */}
-                </div>
-              );
-            })}
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          // Vista para reserva abierta - mantenemos el diseño actual
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="flex gap-4">
+              {slots.map(i => {
+                const p = players[i];
+                return p ? (
+                  <div key={i} className="text-center">
+                    <div className="aspect-square w-12">
+                      <img
+                        src={p.avatar_url || ''}
+                        alt={p.nombre}
+                        className="size-12 rounded-full object-cover border-2 border-green-100 shadow-sm"
+                      />
+                    </div>
+                    <span className="text-xs text-gray-500 mt-1 block">{p.nombre}</span>
+                  </div>
+                ) : (
+                  <div key={i} className="text-center">
+                    <div className="aspect-square w-12">
+                      <div className="size-12 rounded-full bg-gray-50 border-2 border-gray-100 
+                                  flex items-center justify-center shadow-sm">
+                        <span className="text-gray-400 text-sm">+</span>
+                      </div>
+                    </div>
+                    <span className="text-xs text-gray-400 mt-1 block">Libre</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
-        {/* Footer - ajustamos posición */}
-        <div className="absolute bottom-3 left-0 right-0 flex justify-between px-4">
+        {/* Footer */}
+        <div className="absolute bottom-3 left-0 right-0 flex justify-between items-center px-4">
           <span className="text-gray-600 font-medium">
             {start_time.slice(0, 5)} a {formatDisplayEndTime(end_time)}
           </span>
-          <span className="text-gray-600 font-medium">
-            Nivel: {avgLevel}
+          <span className={`font-semibold ${nextReservation.is_private ? 'text-purple-600/75 tabular-nums' : 'text-gray-600'}`}>
+            {nextReservation.is_private ? timeLeft : `Nivel: ${avgLevel}`}
           </span>
         </div>
       </div>
