@@ -58,6 +58,15 @@ export default function MyReservationsPage() {
 
     const fetchUserReservations = async () => {
         try {
+            // Obtener fecha y hora actual
+            const now = new Date();
+            const currentTime = now.toLocaleTimeString('es-ES', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+            const today = now.toISOString().split('T')[0]; // AAAA-MM-DD
+
             // 1. Obtener las reservas creadas por el usuario
             const { data: ownedReservations, error: ownedError } = await supabase
                 .from('reservations')
@@ -66,16 +75,20 @@ export default function MyReservationsPage() {
                 .order('date', { ascending: true })
                 .order('start_time', { ascending: true });
 
-            // Asegurar formato correcto de fechas
+            // Asegurar formato correcto de fechas y filtrar reservas pasadas
+            let filteredOwnedReservations = [];
             if (ownedReservations) {
-                ownedReservations.forEach(reservation => {
-                    console.log('Fecha original:', reservation.date);
-                    reservation.date = ensureCorrectDateFormat(reservation.date);
-                    console.log('Fecha corregida:', reservation.date);
+                filteredOwnedReservations = ownedReservations.filter(reservation => {
+                    const reservationDate = ensureCorrectDateFormat(reservation.date);
+                    // Si la fecha es futura, mantener la reserva
+                    if (reservationDate > today) return true;
+                    // Si es hoy, verificar la hora
+                    if (reservationDate === today) {
+                        return reservation.end_time > currentTime;
+                    }
+                    return false;
                 });
             }
-
-            console.log('Owned reservations con formato corregido:', ownedReservations);
 
             if (ownedError) throw ownedError;
 
@@ -84,8 +97,6 @@ export default function MyReservationsPage() {
                 .from('reservation_players')
                 .select('reservation_id')
                 .eq('user_id', session?.user.id);
-
-            console.log('Joined reservation IDs sin filtro:', joinedReservationsIds);
 
             if (joinedError) throw joinedError;
 
@@ -98,21 +109,25 @@ export default function MyReservationsPage() {
                 .order('date', { ascending: true })
                 .order('start_time', { ascending: true });
 
-            // Asegurar formato correcto de fechas
+            // Filtrar reservas pasadas de las unidas
+            let filteredJoinedReservations = [];
             if (joinedReservations) {
-                joinedReservations.forEach(reservation => {
-                    reservation.date = ensureCorrectDateFormat(reservation.date);
+                filteredJoinedReservations = joinedReservations.filter(reservation => {
+                    const reservationDate = ensureCorrectDateFormat(reservation.date);
+                    if (reservationDate > today) return true;
+                    if (reservationDate === today) {
+                        return reservation.end_time > currentTime;
+                    }
+                    return false;
                 });
             }
 
-            console.log('Joined reservations con formato corregido:', joinedReservations);
-
             if (joinedDetailsError) throw joinedDetailsError;
 
-            // Combinar todas las reservas sin filtrado
+            // Combinar todas las reservas filtradas
             const allReservations = Array.from(
                 new Map(
-                    [...(ownedReservations || []), ...(joinedReservations || [])]
+                    [...filteredOwnedReservations, ...filteredJoinedReservations]
                         .map(item => [item.id, item])
                 ).values()
             );
