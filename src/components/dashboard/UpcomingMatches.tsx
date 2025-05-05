@@ -9,6 +9,7 @@ import UserAvatar from '@/components/common/UserAvatar';
 import { addDays } from 'date-fns';
 import toast from 'react-hot-toast';
 import confetti from 'canvas-confetti';
+import Spinner2 from '@/components/ui/Spinner2';
 
 interface Player {
     user_id: string;
@@ -39,7 +40,7 @@ interface Match {
 // Modificar la función calculateAverageLevel
 const calculateAverageLevel = (match: Match) => {
     const players = match.players || [];
-    
+
     // Si no hay jugadores, devolver guión
     if (players.length === 0) return '—';
 
@@ -62,10 +63,10 @@ export default function UpcomingMatches() {
             const now = new Date();
             const today = formatDateForDB(now);
             const tomorrow = formatDateForDB(addDays(now, 1));
-            const currentTime = now.toLocaleTimeString('es-ES', { 
-                hour: '2-digit', 
+            const currentTime = now.toLocaleTimeString('es-ES', {
+                hour: '2-digit',
                 minute: '2-digit',
-                hour12: false 
+                hour12: false
             });
 
             // Obtener partidos de hoy y mañana
@@ -172,7 +173,7 @@ export default function UpcomingMatches() {
 
             toast.dismiss(toastLoading);
             toast.success('¡Te has unido al partido!');
-            
+
             // Recargar la página después de un breve delay para que se vea el confeti
             setTimeout(() => {
                 window.location.reload();
@@ -195,7 +196,13 @@ export default function UpcomingMatches() {
         fetchUpcomingMatches();
     }, []);
 
-    if (loading) return null;
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-32">
+                <Spinner2 className="w-8 h-8" />
+            </div>
+        );
+    }
 
     if (matches.length === 0) {
         return (
@@ -210,7 +217,7 @@ export default function UpcomingMatches() {
         <div className="">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Partidos Disponibles</h2>
-                <Link 
+                <Link
                     href="/available-matches"
                     className="text-sm text-blue-500 hover:text-blue-600"
                 >
@@ -220,8 +227,8 @@ export default function UpcomingMatches() {
 
             <div className="space-y-4">
                 {matches.map((match) => (
-                    <div 
-                        key={match.id} 
+                    <div
+                        key={match.id}
                         onClick={() => {
                             // Verificar si el usuario ya está en el partido
                             const isUserInMatch = match.players.some(
@@ -236,11 +243,11 @@ export default function UpcomingMatches() {
                             }
                         }}
                         className={`flex justify-between items-center p-3 border border-gray-500/30 rounded-lg overflow-hidden bg-white shadow-md
-                                  ${match.players.length < 4 && 
-                                    !match.players.some(p => p.user_id === session?.user.id) && 
-                                    match.usuarios.id !== session?.user.id
-                                    ? 'cursor-pointer hover:bg-gray-50 transition-colors'
-                                    : 'cursor-default'}`}
+                                  ${match.players.length < 4 &&
+                                !match.players.some(p => p.user_id === session?.user.id) &&
+                                match.usuarios.id !== session?.user.id
+                                ? 'cursor-pointer hover:bg-gray-50 transition-colors'
+                                : 'cursor-default'}`}
                     >
                         <div>
                             <div className="text-gray-900 font-medium mb-1">
@@ -259,13 +266,13 @@ export default function UpcomingMatches() {
                                     avatarUrl={match.usuarios?.avatar_url}
                                     className="w-14 h-14 border-2 border-blue-100 shadow-sm rounded-full"
                                 />
-                                
+
                                 <div className="absolute -top-1 -right-18 flex -space-x-1">
                                     {Array.from({ length: 3 }).map((_, i) => {
                                         const players = filteredPlayers(match);
                                         const player = players[i];
                                         return (
-                                            <button 
+                                            <button
                                                 key={`slot-${i}`}
                                                 onClick={() => {
                                                     if (!player && confirm('¿Quieres unirte a este partido?')) {
@@ -274,9 +281,9 @@ export default function UpcomingMatches() {
                                                 }}
                                                 className={`w-8 h-8 rounded-full border-2 border-white 
                                                           flex items-center justify-center transition-colors overflow-hidden
-                                                          ${player ? 
-                                                            'border-green-200' : 
-                                                            'bg-gray-100 hover:bg-blue-50 hover:border-blue-200'}`}
+                                                          ${player ?
+                                                        'border-green-200' :
+                                                        'bg-gray-100 hover:bg-blue-50 hover:border-blue-200'}`}
                                                 title={player ? player.usuario?.nombre : "Unirte al partido"}
                                                 disabled={!!player}
                                             >
