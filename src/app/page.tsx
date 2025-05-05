@@ -5,6 +5,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { useEffect, useState } from 'react';
 import NextReservation from '@/components/dashboard/NextReservation';
 import DashboardActions from '@/components/dashboard/DashboardActions';
+import ReservationsChart from '@/components/dashboard/ReservationsChart';
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -69,6 +70,10 @@ export default function DashboardPage() {
                 
                 <div>
                     <DashboardActions />
+                </div>
+
+                <div className='mt-4'>
+                    <ReservationsChart />
                 </div>
             </div>
         </div>
