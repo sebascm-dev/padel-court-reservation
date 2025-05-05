@@ -206,7 +206,28 @@ export default function UpcomingMatches() {
 
             <div className="space-y-4">
                 {matches.map((match) => (
-                    <div key={match.id} className="flex justify-between items-center p-3 border rounded-lg overflow-hidden">
+                    <div 
+                        key={match.id} 
+                        onClick={() => {
+                            // Verificar si el usuario ya está en el partido
+                            const isUserInMatch = match.players.some(
+                                player => player.user_id === session?.user.id
+                            );
+                            const isCreator = match.usuarios.id === session?.user.id;
+
+                            if (!isUserInMatch && !isCreator && match.players.length < 4) {
+                                if (confirm('¿Quieres unirte a este partido?')) {
+                                    handleJoinMatch(match.id);
+                                }
+                            }
+                        }}
+                        className={`flex justify-between items-center p-3 border rounded-lg overflow-hidden
+                                  ${match.players.length < 4 && 
+                                    !match.players.some(p => p.user_id === session?.user.id) && 
+                                    match.usuarios.id !== session?.user.id
+                                    ? 'cursor-pointer hover:bg-gray-50 transition-colors'
+                                    : 'cursor-default'}`}
+                    >
                         <div>
                             <div className="text-gray-900 font-medium mb-1">
                                 {formatDateToSpanish(match.date, match.start_time, match.end_time)}
@@ -217,8 +238,7 @@ export default function UpcomingMatches() {
                         </div>
 
                         <div className="flex items-center">
-                            <div className="relative mr-16"> {/* Añadido margen derecho */}
-                                {/* Círculo grande del creador */}
+                            <div className="relative mr-16">
                                 <UserAvatar
                                     nombre={match.usuarios?.nombre || ''}
                                     apellidos={match.usuarios?.apellidos || ''}
@@ -226,7 +246,6 @@ export default function UpcomingMatches() {
                                     className="w-14 h-14 border-2 border-blue-100 shadow-sm rounded-full"
                                 />
                                 
-                                {/* Círculos pequeños elevados */}
                                 <div className="absolute -top-1 -right-18 flex -space-x-1">
                                     {Array.from({ length: 3 }).map((_, i) => {
                                         const players = filteredPlayers(match);
