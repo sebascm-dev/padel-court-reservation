@@ -7,6 +7,7 @@ import Spinner2 from '@/components/ui/Spinner2';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { formatDisplayEndTime, formatDateForDB } from '@/utils/dateUtils';
+import confetti from 'canvas-confetti';
 
 interface Player {
   id: string;
@@ -42,6 +43,11 @@ export default function NextReservation() {
       if (!session?.user.id) return;
 
       const now = new Date();
+      const currentTime = now.toLocaleTimeString('es-ES', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false 
+      });
       const today = formatDateForDB(now);
 
       const { data: mine } = await supabase
@@ -71,7 +77,16 @@ export default function NextReservation() {
       }
 
       const all = [...(mine || []), ...playerRes];
-      const next = all
+      const validReservations = all.filter(reservation => {
+        const reservationDate = reservation.date;
+        if (reservationDate > today) return true;
+        if (reservationDate === today) {
+          return reservation.end_time > currentTime;
+        }
+        return false;
+      });
+
+      const next = validReservations
         .sort((a, b) => {
           const dateA = new Date(`${a.date}T${a.start_time}`);
           const dateB = new Date(`${b.date}T${b.start_time}`);
@@ -161,6 +176,17 @@ export default function NextReservation() {
 
       if (diff <= 0) {
         setTimeLeft('¡Hora de jugar!');
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#4CAF50', '#2196F3', '#FFC107', '#E91E63']
+        });
+        
+        setTimeout(() => {
+          fetchNextReservation();
+        }, 60000);
+        
         clearInterval(timer);
         return;
       }
@@ -326,7 +352,15 @@ export default function NextReservation() {
           <span className="text-gray-600 font-medium">
             {start_time.slice(0, 5)} a {formatDisplayEndTime(end_time)}
           </span>
-          <span className={`font-medium ${nextReservation.is_private ? 'text-purple-600/75 font-semibold tabular-nums' : 'text-gray-600'}`}>
+          <span className={`font-medium ${
+            nextReservation.is_private 
+              ? 'text-purple-600/75 font-semibold tabular-nums' 
+              : 'text-gray-600'
+            } ${
+              timeLeft === '¡Hora de jugar!' 
+                ? 'animate-bounce text-green-500 font-bold' 
+                : ''
+            }`}>
             {nextReservation.is_private ? timeLeft : `Nivel: ${avgLevel}`}
           </span>
         </div>
