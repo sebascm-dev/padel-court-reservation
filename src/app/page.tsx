@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useEffect, useState } from 'react';
 import NextReservation from '@/components/dashboard/NextReservation';
+import DashboardActions from '@/components/dashboard/DashboardActions';
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -39,41 +40,37 @@ export default function DashboardPage() {
 
     return (
         <div className="container mx-auto p-4">
-            <div className="flex items-center gap-1 mb-6">
-                <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    className="size-6 text-blue-500" 
-                    fill="none" 
-                    viewBox="0 0 24 24" 
-                    stroke="currentColor"
-                >
-                    <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth={2} 
-                        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" 
-                    />
-                </svg>
-                <h1 className="text-2xl font-bold">
-                    Bienvenido, <span className="text-blue-600">{userName}</span>
-                </h1>
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-1">
+                    <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        className="size-6 text-blue-500" 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                    >
+                        <path 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth={2} 
+                            d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" 
+                        />
+                    </svg>
+                    <h1 className="text-2xl font-bold">
+                        Bienvenido, <span className="text-blue-600">{userName}</span>
+                    </h1>
+                </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Próxima Reserva */}
+            <div className="flex flex-col gap-5">
                 <div>
                     <NextReservation />
                 </div>
                 
-                {/* Otros widgets del dashboard */}
+                <div>
+                    <DashboardActions />
+                </div>
             </div>
-
-            <button 
-                onClick={handleLogout}
-                className="bg-red-500 text-white px-4 py-2 rounded mt-4"
-            >
-                Cerrar sesión
-            </button>
         </div>
     );
 }
