@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Spinner from '../ui/Spinner';
+import Image from 'next/image';
 
 interface AvatarUploadProps {
     url?: string;
@@ -37,8 +38,6 @@ export default function AvatarUpload({ url, onUpload, size = 150, nombre, apelli
 
             const file = event.target.files?.[0];
             if (!file) return;
-
-            const objectUrl = URL.createObjectURL(file);
 
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('No user');
@@ -87,20 +86,22 @@ export default function AvatarUpload({ url, onUpload, size = 150, nombre, apelli
                 {avatarUrl && !imageError ? (
                     <div className="relative w-full h-full">
                         {(uploading || imageLoading) && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-50">
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-50 z-10">
                                 <Spinner className="h-8 w-8" />
                             </div>
                         )}
-                        <img
+                        <Image
                             src={avatarUrl}
                             alt="Avatar"
-                            className="h-full w-full object-cover"
+                            fill
+                            className="object-cover"
                             onLoad={() => setImageLoading(false)}
                             onError={() => setImageError(true)}
+                            sizes={`${size}px`}
                         />
                     </div>
                 ) : (
-                    <div className="h-full w-full flex items-center justify-center bg-blue-700/85 text-white text-6xl font-bold">
+                    <div className="h-full w-full flex items-center justify-center bg-blue-500/80 text-white text-6xl font-bold">
                         {uploading ? (
                             <Spinner className="h-8 w-8" />
                         ) : (
@@ -110,7 +111,7 @@ export default function AvatarUpload({ url, onUpload, size = 150, nombre, apelli
                 )}
             </div>
             
-            <label className="cursor-pointer bg-blue-700/85 text-white px-4 py-2 rounded hover:bg-blue-600/75 transition-colors">
+            <label className="cursor-pointer bg-blue-500/80 text-white px-4 py-2 rounded hover:bg-blue-300/75 transition-colors">
                 {uploading ? 'Subiendo...' : 'Cambiar avatar'}
                 <input
                     type="file"
