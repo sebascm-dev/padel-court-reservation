@@ -21,7 +21,7 @@ export default function LoginPage() {
         const loadingToast = toast.loading('Iniciando sesión...');
 
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const { error } = await supabase.auth.signInWithPassword({
                 email: formData.email,
                 password: formData.password,
             });
@@ -33,9 +33,9 @@ export default function LoginPage() {
             router.push('/');
             router.refresh();
 
-        } catch (error: any) {
+        } catch (error) {
             toast.dismiss(loadingToast);
-            if (error.message === 'Invalid login credentials') {
+            if (error instanceof Error && error.message === 'Invalid login credentials') {
                 toast.error('Credenciales incorrectas');
             } else {
                 toast.error('Error al iniciar sesión');
