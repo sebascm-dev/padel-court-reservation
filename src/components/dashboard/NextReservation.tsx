@@ -127,6 +127,28 @@ export default function NextReservation() {
     }
   };
 
+  const handleCancelReservation = async () => {
+    const confirmar = confirm('¿Estás seguro de que quieres cancelar esta reserva? Esta acción no se puede deshacer.');
+    
+    if (!confirmar) return;
+
+    try {
+      await supabase
+        .from('reservation_players')
+        .delete()
+        .eq('reservation_id', nextReservation?.id || '');
+
+      await supabase
+        .from('reservations')
+        .delete()
+        .eq('id', nextReservation?.id || '');
+
+      fetchNextReservation();
+    } catch (error) {
+      console.error('Error al cancelar la reserva:', error);
+    }
+  };
+
   useEffect(() => {
     fetchNextReservation();
   }, [session]);
@@ -135,13 +157,12 @@ export default function NextReservation() {
     if (!nextReservation) return;
 
     const timer = setInterval(() => {
-      // Construimos la fecha de reserva correctamente
       const [year, day, month] = nextReservation.date.split('-');
       const [hours, minutes] = nextReservation.start_time.split(':');
       
       const reservationDate = new Date(
         parseInt(year),
-        parseInt(month) - 1, // Los meses en JS son 0-based
+        parseInt(month) - 1,
         parseInt(day),
         parseInt(hours),
         parseInt(minutes)
@@ -206,8 +227,7 @@ export default function NextReservation() {
       <div className={`relative bg-white rounded-xl p-6 border border-gray-200 shadow-md h-[160px]
         ${nextReservation.is_private ? 'bg-gradient-to-br from-purple-50 to-white' : ''}`}>
         
-        {/* Pill estado - ajustamos posición */}
-        <div className="absolute top-3 left-4">
+        <div className="absolute top-2.5 left-4 flex items-center gap-2">
           <span className={`px-3 py-1 rounded-full text-sm font-medium border
             ${nextReservation.is_private 
               ? 'bg-purple-100 text-purple-700 border-purple-200' 
@@ -217,9 +237,28 @@ export default function NextReservation() {
           >
             {nextReservation.is_private ? 'Privada' : players.length < 4 ? 'Abierta' : 'Completa'}
           </span>
+          
+          <button
+            onClick={handleCancelReservation}
+            className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+            title="Cancelar reserva"
+          >
+            <svg 
+              className="w-4 h-4 text-gray-400 hover:text-red-500 transition-colors" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M6 18L18 6M6 6l12 12" 
+              />
+            </svg>
+          </button>
         </div>
 
-        {/* Fecha - ajustamos posición y tamaño */}
         <div className="absolute top-3 right-4">
           <span className="text-base font-medium text-gray-700">
             {format(formattedDate, "EEEE, d 'de' MMMM", { locale: es })}
@@ -230,7 +269,6 @@ export default function NextReservation() {
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div className="flex flex-col items-center">
               <div className="relative mb-2">
-                {/* Avatar con overlay */}
                 <div className="size-18 rounded-full overflow-hidden relative">
                   <img
                     src={nextReservation.creator?.avatar_url || ''}
@@ -239,7 +277,6 @@ export default function NextReservation() {
                   />
                   <div className="absolute inset-0 bg-black/20" />
                 </div>
-                {/* Candado superpuesto */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <svg 
                     className="w-8 h-8 text-gray-300/80 drop-shadow-md" 
@@ -259,7 +296,6 @@ export default function NextReservation() {
             </div>
           </div>
         ) : (
-          // Vista para reserva abierta - mantenemos el diseño actual
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div className="flex gap-4">
               {slots.map(i => {
@@ -291,7 +327,6 @@ export default function NextReservation() {
           </div>
         )}
 
-        {/* Footer */}
         <div className="absolute bottom-3 left-0 right-0 flex justify-between items-center px-4">
           <span className="text-gray-600 font-medium">
             {start_time.slice(0, 5)} a {formatDisplayEndTime(end_time)}
