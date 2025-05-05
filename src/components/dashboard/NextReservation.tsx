@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
 import Spinner2 from '@/components/ui/Spinner2';
@@ -8,8 +8,6 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { formatDisplayEndTime, formatDateForDB } from '@/utils/dateUtils';
 import confetti from 'canvas-confetti';
-import Link from 'next/link';
-import Avatar from '@/components/ui/Avatar';
 import UserAvatar from '@/components/common/UserAvatar';
 
 interface Player {
@@ -41,7 +39,7 @@ export default function NextReservation() {
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState('');
 
-  const fetchNextReservation = async () => {
+  const fetchNextReservation = useCallback(async () => {
     try {
       if (!session?.user.id) return;
 
@@ -66,7 +64,7 @@ export default function NextReservation() {
         .select('reservation_id')
         .eq('user_id', session.user.id);
 
-      let playerRes: any[] = [];
+      let playerRes: Reservation[] = [];
       if (asPlayer?.length) {
         const ids = asPlayer.map(r => r.reservation_id);
         const { data } = await supabase
@@ -141,7 +139,7 @@ export default function NextReservation() {
       console.error(e);
       setLoading(false);
     }
-  };
+  }, [session]);
 
   const handleCancelReservation = async () => {
     const confirmar = confirm('¿Estás seguro de que quieres cancelar esta reserva? Esta acción no se puede deshacer.');
@@ -167,7 +165,7 @@ export default function NextReservation() {
 
   useEffect(() => {
     fetchNextReservation();
-  }, [session]);
+  }, [fetchNextReservation]);
 
   useEffect(() => {
     if (!nextReservation) return;
@@ -202,7 +200,7 @@ export default function NextReservation() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [nextReservation]);
+  }, [nextReservation, fetchNextReservation]);
 
   if (loading) {
     return (
@@ -245,22 +243,13 @@ export default function NextReservation() {
     );
   }
 
-  const capitalizeFirstLetter = (str: string) => {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  };
-
   const { date, start_time, end_time, players } = nextReservation;
 
   const formattedDate = new Date(`${date}T00:00:00`);
 
   const displayDate = format(formattedDate, "EEEE, d 'de' MMMM", { locale: es })
     .split(' ')
-    .map((word, index) => {
-      if (word !== 'de') {
-        return word.charAt(0).toUpperCase() + word.slice(1);
-      }
-      return word;
-    })
+    .map(word => word === 'de' ? word : word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 
   const avgLevel = players.length 
@@ -325,7 +314,6 @@ export default function NextReservation() {
                     size='lg'
                     className="border-2 border-purple-100"
                   />
-                  <div className="absolute inset-0 bg-black/20" />
                 </div>
               </div>
             </div>
