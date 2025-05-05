@@ -317,7 +317,7 @@ export default function UpcomingMatches() {
                                                         nombre={player.usuario?.nombre || ''}
                                                         apellidos={player.usuario?.apellidos || ''}
                                                         avatarUrl={player.usuario?.avatar_url}
-                                                        className="w-full h-full object-cover"
+                                                        className="w-full h-full object-cover text-xs"
                                                     />
                                                 ) : (
                                                     <span className="text-[10px] text-gray-400 hover:text-blue-500">+</span>
