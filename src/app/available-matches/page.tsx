@@ -9,11 +9,21 @@ import { formatDateToSpanish, formatDisplayEndTime } from '@/utils/dateUtils';
 import UserAvatar from '@/components/common/UserAvatar';
 import Spinner2 from '@/components/ui/Spinner2';
 
-// Añade estas funciones de utilidad al principio del archivo, después de los imports
-const getLocalISOString = (date: Date) => {
-    const offset = date.getTimezoneOffset();
-    const localDate = new Date(date.getTime() - offset * 60 * 1000);
-    return localDate.toISOString().split('T')[0];
+// Reemplazar la función getLocalISOString por una más específica
+const formatDateToYYYYMMDD = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+// Añadir función para validar formato de fecha
+const isValidDateFormat = (dateString: string): boolean => {
+    const regex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!regex.test(dateString)) return false;
+    
+    const [year, month, day] = dateString.split('-').map(Number);
+    return month <= 12 && day <= 31;
 };
 
 interface Player {
@@ -49,7 +59,6 @@ export default function AvailableMatchesPage() {
 
     const fetchReservations = async () => {
         try {
-            // Quitamos la obtención de fecha y hora actual ya que no las usaremos
             const { data: reservationsData, error: reservationsError } = await supabase
                 .from('reservations')
                 .select(`
@@ -62,16 +71,23 @@ export default function AvailableMatchesPage() {
                     )
                 `)
                 .eq('is_private', false)
-                // Quitamos el filtro por fecha
                 .order('date', { ascending: true })
                 .order('start_time', { ascending: true });
 
             if (reservationsError) throw reservationsError;
 
             if (reservationsData) {
-                // Quitamos el filtrado y usamos directamente reservationsData
+                // Asegurar que las fechas estén en formato correcto
+                const formattedReservations = reservationsData.map(reservation => ({
+                    ...reservation,
+                    date: isValidDateFormat(reservation.date) 
+                        ? reservation.date 
+                        : formatDateToYYYYMMDD(new Date(reservation.date))
+                }));
+
+                // Obtener los jugadores para cada reserva
                 const reservationsWithPlayers = await Promise.all(
-                    reservationsData.map(async (reservation) => {
+                    formattedReservations.map(async (reservation) => {
                         const { data: players, error: playersError } = await supabase
                             .from('reservation_players')
                             .select(`
@@ -85,7 +101,13 @@ export default function AvailableMatchesPage() {
                             `)
                             .eq('reservation_id', reservation.id);
                         
-                        if (playersError) console.error('Error al obtener jugadores:', playersError);
+                        if (playersError) {
+                            console.error('Error al obtener jugadores:', playersError);
+                            return {
+                                ...reservation,
+                                players: []
+                            };
+                        }
 
                         return {
                             ...reservation,
@@ -94,6 +116,7 @@ export default function AvailableMatchesPage() {
                     })
                 );
 
+                console.log('Reservas formateadas:', reservationsWithPlayers);
                 setReservations(reservationsWithPlayers);
             }
         } catch (error) {
@@ -259,7 +282,15 @@ export default function AvailableMatchesPage() {
                             {/* Encabezado con fecha y hora */}
                             <div className="flex justify-between items-start mb-4">
                                 <h3 className="font-semibold text-lg">
-                                    <span>{formatDateToSpanish(reservation.date, reservation.start_time, reservation.end_time)}</span>
+                                    <span>
+                                        {formatDateToSpanish(
+                                            isValidDateFormat(reservation.date) 
+                                                ? reservation.date 
+                                                : formatDateToYYYYMMDD(new Date(reservation.date)),
+                                            reservation.start_time,
+                                            reservation.end_time
+                                        )}
+                                    </span>
                                 </h3>
                                 <span className="text-lg font-medium">
                                     {reservation.start_time.slice(0, 5)}

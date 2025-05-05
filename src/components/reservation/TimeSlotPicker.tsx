@@ -64,11 +64,11 @@ export default function TimeSlotPicker({ selectedTime, onChange, date }: TimeSlo
                 return;
             }
 
-            // Formatear la fecha en el formato AAAA-DD-MM que usa Supabase
-            const day = date.getDate().toString().padStart(2, '0');
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            // Corregimos el formato de la fecha a AAAA-MM-DD
             const year = date.getFullYear();
-            const dateString = `${year}-${day}-${month}`;
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            const dateString = `${year}-${month}-${day}`;
             
             console.log('Fecha formateada para Supabase:', dateString);
             

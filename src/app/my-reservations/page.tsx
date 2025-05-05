@@ -40,9 +40,20 @@ export default function MyReservationsPage() {
         }
     }, [session]);
 
-    const getLocalISOString = (date: Date) => {
-        const tzOffset = date.getTimezoneOffset() * 60000;
-        return new Date(date.getTime() - tzOffset).toISOString().split('T')[0];
+    const ensureCorrectDateFormat = (dateString: string): string => {
+        // Verificar si ya está en formato AAAA-MM-DD
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (dateRegex.test(dateString)) {
+            // Verificar que el mes sea válido (1-12)
+            const [year, month, day] = dateString.split('-').map(Number);
+            if (month <= 12) {
+                return dateString;
+            }
+        }
+
+        // Si no está en formato correcto, convertir de AAAA-DD-MM a AAAA-MM-DD
+        const [year, day, month] = dateString.split('-');
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     };
 
     const fetchUserReservations = async () => {
@@ -55,7 +66,16 @@ export default function MyReservationsPage() {
                 .order('date', { ascending: true })
                 .order('start_time', { ascending: true });
 
-            console.log('Owned reservations sin filtro:', ownedReservations);
+            // Asegurar formato correcto de fechas
+            if (ownedReservations) {
+                ownedReservations.forEach(reservation => {
+                    console.log('Fecha original:', reservation.date);
+                    reservation.date = ensureCorrectDateFormat(reservation.date);
+                    console.log('Fecha corregida:', reservation.date);
+                });
+            }
+
+            console.log('Owned reservations con formato corregido:', ownedReservations);
 
             if (ownedError) throw ownedError;
 
@@ -78,7 +98,14 @@ export default function MyReservationsPage() {
                 .order('date', { ascending: true })
                 .order('start_time', { ascending: true });
 
-            console.log('Joined reservations sin filtro:', joinedReservations);
+            // Asegurar formato correcto de fechas
+            if (joinedReservations) {
+                joinedReservations.forEach(reservation => {
+                    reservation.date = ensureCorrectDateFormat(reservation.date);
+                });
+            }
+
+            console.log('Joined reservations con formato corregido:', joinedReservations);
 
             if (joinedDetailsError) throw joinedDetailsError;
 
@@ -134,14 +161,12 @@ export default function MyReservationsPage() {
         }
     };
 
-    // Primero añadimos la función para cancelar la reserva
     const handleDeleteReservation = async (reservationId: string) => {
         if (!confirm('¿Estás seguro de que quieres cancelar esta reserva?')) {
             return;
         }
 
         try {
-            // Primero borramos los jugadores asociados
             const { error: playersError } = await supabase
                 .from('reservation_players')
                 .delete()
@@ -149,7 +174,6 @@ export default function MyReservationsPage() {
 
             if (playersError) throw playersError;
 
-            // Luego borramos la reserva
             const { error: reservationError } = await supabase
                 .from('reservations')
                 .delete()
@@ -158,7 +182,7 @@ export default function MyReservationsPage() {
             if (reservationError) throw reservationError;
 
             toast.success('Reserva cancelada correctamente');
-            fetchUserReservations(); // Actualizamos la lista
+            fetchUserReservations();
         } catch (error) {
             console.error('Error al cancelar la reserva:', error);
             toast.error('Error al cancelar la reserva');
@@ -200,7 +224,6 @@ export default function MyReservationsPage() {
                             key={reservation.id}
                             className="border rounded-lg p-4 bg-white shadow-sm relative"
                         >
-                            {/* Header con fecha/hora y tipo */}
                             <div className="flex justify-between items-start mb-2">
                                 <div className="text-lg flex items-center">
                                     <span>{formatDateToSpanish(reservation.date, reservation.start_time, reservation.end_time)}</span>
@@ -217,7 +240,6 @@ export default function MyReservationsPage() {
                                 </span>
                             </div>
 
-                            {/* Estado del usuario y lista de jugadores solo si NO es privada */}
                             {!reservation.is_private && (
                                 <>
                                     <div className="flex items-center gap-2 text-sm">
@@ -253,7 +275,6 @@ export default function MyReservationsPage() {
                                 </>
                             )}
 
-                            {/* Botones de acción */}
                             <div className="flex justify-center gap-2 mt-4">
                                 {reservation.isOwner && (
                                     <button

@@ -6,7 +6,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import Spinner2 from '@/components/ui/Spinner2';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { formatDisplayEndTime } from '@/utils/dateUtils';
+import { formatDisplayEndTime, formatDateForDB } from '@/utils/dateUtils';
 
 interface Player {
   id: string;
@@ -40,8 +40,9 @@ export default function NextReservation() {
   const fetchNextReservation = async () => {
     try {
       if (!session?.user.id) return;
+
       const now = new Date();
-      const today = `${now.getFullYear()}-${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const today = formatDateForDB(now);
 
       const { data: mine } = await supabase
         .from('reservations')
@@ -72,12 +73,9 @@ export default function NextReservation() {
       const all = [...(mine || []), ...playerRes];
       const next = all
         .sort((a, b) => {
-          const [yA, dA, mA] = a.date.split('-');
-          const [yB, dB, mB] = b.date.split('-');
-          return (
-            new Date(`${yA}-${mA}-${dA}T${a.start_time}`).getTime() -
-            new Date(`${yB}-${mB}-${dB}T${b.start_time}`).getTime()
-          );
+          const dateA = new Date(`${a.date}T${a.start_time}`);
+          const dateB = new Date(`${b.date}T${b.start_time}`);
+          return dateA.getTime() - dateB.getTime();
         })
         .shift();
 
@@ -157,17 +155,7 @@ export default function NextReservation() {
     if (!nextReservation) return;
 
     const timer = setInterval(() => {
-      const [year, day, month] = nextReservation.date.split('-');
-      const [hours, minutes] = nextReservation.start_time.split(':');
-      
-      const reservationDate = new Date(
-        parseInt(year),
-        parseInt(month) - 1,
-        parseInt(day),
-        parseInt(hours),
-        parseInt(minutes)
-      );
-
+      const reservationDate = new Date(`${nextReservation.date}T${nextReservation.start_time}`);
       const now = new Date();
       const diff = reservationDate.getTime() - now.getTime();
 
@@ -210,8 +198,7 @@ export default function NextReservation() {
 
   const { date, start_time, end_time, players } = nextReservation;
 
-  const [year, day, month] = date.split('-');
-  const formattedDate = new Date(`${year}-${month}-${day}T00:00:00`);
+  const formattedDate = new Date(`${date}T00:00:00`);
 
   const displayDate = format(formattedDate, "EEEE, d 'de' MMMM", { locale: es })
     .split(' ')

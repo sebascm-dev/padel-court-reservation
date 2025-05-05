@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { formatDateForDB } from '@/utils/dateUtils';
 
 interface MonthlyReservations {
   [key: string]: number;
@@ -14,6 +15,17 @@ interface ChartData {
   reservas: number;
 }
 
+const isValidDateFormat = (dateString: string): boolean => {
+  const regex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!regex.test(dateString)) {
+    console.error(`Formato de fecha inválido: ${dateString}. Debe ser AAAA-MM-DD`);
+    return false;
+  }
+  
+  const [year, month, day] = dateString.split('-').map(Number);
+  return month <= 12 && day <= 31;
+};
+
 const ReservationsCount = () => {
   const [monthlyReservations, setMonthlyReservations] = useState<MonthlyReservations>({});
   const [loading, setLoading] = useState(true);
@@ -23,6 +35,7 @@ const ReservationsCount = () => {
     const months = [];
     for (let i = 8; i >= 0; i--) {
       const date = subMonths(new Date(), i);
+      // Formatear la fecha como AAAA-MM-DD
       months.push(format(date, 'MMMM', { locale: es }));
     }
     return months;
@@ -32,6 +45,9 @@ const ReservationsCount = () => {
     const fetchReservationCount = async () => {
       try {
         if (!session?.user?.id) return;
+
+        // Obtener la fecha actual en formato AAAA-MM-DD
+        const today = formatDateForDB(new Date());
 
         // 1. Obtener las reservas creadas por el usuario
         const { data: ownedReservations, error: ownedError } = await supabase
@@ -81,17 +97,19 @@ const ReservationsCount = () => {
 
         // 5. Organizar reservas por mes
         const reservationsByMonth = allReservations.reduce((acc: MonthlyReservations, reservation) => {
-          // La fecha viene en formato 'YYYY-DD-MM'
-          const [year, day, month] = reservation.date.split('-').map(Number);
-          // Creamos la fecha correctamente con el orden adecuado
+          // Asumimos que la fecha viene en formato AAAA-MM-DD
+          const [year, month, day] = reservation.date.split('-').map(Number);
+          
+          // Creamos la fecha con el formato correcto
           const date = new Date(year, month - 1, day);
-          const monthKey = date.toLocaleDateString('es-ES', { month: 'long' });
+          const monthKey = format(date, 'MMMM', { locale: es });
           
           console.log('Procesando reserva:', {
             fechaOriginal: reservation.date,
+            formatoEsperado: 'AAAA-MM-DD',
             año: year,
-            día: day,
             mes: month,
+            día: day,
             fechaProcesada: date.toISOString(),
             mesResultante: monthKey
           });
@@ -111,7 +129,7 @@ const ReservationsCount = () => {
     };
 
     fetchReservationCount();
-  }, [session, supabase]);
+  }, [session]);
 
   const formatDataForChart = (reservations: MonthlyReservations): ChartData[] => {
     const months = getLastMonths();

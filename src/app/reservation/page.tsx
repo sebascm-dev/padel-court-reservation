@@ -25,14 +25,18 @@ export default function ReservationPage() {
         const endTime = addMinutes(selectedTime, 89);
 
         try {
-            const localDateString = selectedDate.toLocaleDateString('es-ES');
+            // Formatear la fecha correctamente en AAAA-MM-DD
+            const year = selectedDate.getFullYear();
+            const month = (selectedDate.getMonth() + 1).toString().padStart(2, '0');
+            const day = selectedDate.getDate().toString().padStart(2, '0');
+            const formattedDate = `${year}-${month}-${day}`;
 
-            // 1. Crear la reserva
+            // Crear la reserva con el formato correcto
             const { data: reservation, error: reservationError } = await supabase
                 .from('reservations')
                 .insert({
                     user_id: session.user.id,
-                    date: localDateString,
+                    date: formattedDate,
                     start_time: startTime,
                     end_time: endTime,
                     is_private: isPrivate
