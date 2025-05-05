@@ -8,6 +8,7 @@ import Link from 'next/link';
 import UserAvatar from '@/components/common/UserAvatar';
 import { addDays } from 'date-fns';
 import toast from 'react-hot-toast';
+import confetti from 'canvas-confetti';
 
 interface Player {
     user_id: string;
@@ -161,9 +162,22 @@ export default function UpcomingMatches() {
 
             if (error) throw error;
 
+            // Lanzar confeti
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#4CAF50', '#2196F3', '#FFC107', '#E91E63']
+            });
+
             toast.dismiss(toastLoading);
             toast.success('¡Te has unido al partido!');
-            fetchUpcomingMatches(); // Actualizar la lista
+            
+            // Recargar la página después de un breve delay para que se vea el confeti
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+
         } catch (error) {
             console.error('Error al unirse al partido:', error);
             toast.error('Error al unirse al partido');
