@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/components/auth/AuthProvider'; // Cambiado el import
-import Link from 'next/link';
+import { useAuth } from '@/components/auth/AuthProvider';
 import Image from 'next/image';
 import UserAvatar from '@/components/common/UserAvatar';
 
