@@ -296,7 +296,7 @@ export default function NextReservation() {
           <span className="text-gray-600 font-medium">
             {start_time.slice(0, 5)} a {formatDisplayEndTime(end_time)}
           </span>
-          <span className={`font-semibold ${nextReservation.is_private ? 'text-purple-600/75 tabular-nums' : 'text-gray-600'}`}>
+          <span className={`font-medium ${nextReservation.is_private ? 'text-purple-600/75 font-semibold tabular-nums' : 'text-gray-600'}`}>
             {nextReservation.is_private ? timeLeft : `Nivel: ${avgLevel}`}
           </span>
         </div>
