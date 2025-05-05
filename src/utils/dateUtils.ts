@@ -41,9 +41,33 @@ export function getLocalISOString(date: Date): string {
     return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString();
 }
 
+export function isValidDateFormat(dateString: string): boolean {
+    // Verifica si la fecha está en formato AAAA-MM-DD
+    const regex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!regex.test(dateString)) return false;
+    
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    
+    return date.getFullYear() === year &&
+           date.getMonth() === month - 1 &&
+           date.getDate() === day;
+}
+
 export function formatDateToSpanish(date: string, startTime: string, endTime: string): string {
-    const [year, day, month] = date.split('-');
+    if (!isValidDateFormat(date)) {
+        console.error('Formato de fecha inválido:', date);
+        return 'Fecha inválida';
+    }
+
+    const [year, month, day] = date.split('-');
     const formattedDate = new Date(`${year}-${month}-${day}T00:00:00`);
+    
+    // Verificamos que la fecha sea válida
+    if (isNaN(formattedDate.getTime())) {
+        console.error('Fecha inválida:', date);
+        return 'Fecha inválida';
+    }
     
     const weekDay = formattedDate.toLocaleString('es-ES', { weekday: 'long' });
     const capitalizedWeekDay = weekDay.charAt(0).toUpperCase() + weekDay.slice(1);
@@ -52,4 +76,16 @@ export function formatDateToSpanish(date: string, startTime: string, endTime: st
     const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
     
     return `${capitalizedWeekDay}, ${dayNumber} de ${capitalizedMonth}`;
+}
+
+export function formatDateForDB(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+export function parseDateFromDB(dateString: string): Date {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
 }
