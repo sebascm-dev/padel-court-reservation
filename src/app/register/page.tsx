@@ -1,5 +1,5 @@
 "use client"
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
@@ -8,9 +8,11 @@ import toast from 'react-hot-toast';
 import LocalidadAutocomplete from '@/components/ui/LocalidadAutocomplete';
 import { getNivelDescription } from '@/utils/nivelPadel';
 import { AuthError } from '@supabase/supabase-js';
+import { useAuth } from '@/components/auth/AuthProvider'; // Cambiar la ruta del import
 
 export default function RegisterPage() {
     const router = useRouter();
+    const { session } = useAuth(); // Usar el useAuth del AuthProvider
     const [formData, setFormData] = useState({
         nombre: '',
         apellidos: '',
@@ -25,6 +27,15 @@ export default function RegisterPage() {
     });
     const [registrationComplete, setRegistrationComplete] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (session) {
+            router.push('/'); // Redirige a la página principal si ya está autenticado
+            return;
+        }
+    }, [session, router]);
+
+    if (session) return null;
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();

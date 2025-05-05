@@ -6,6 +6,7 @@ import { toast } from 'react-hot-toast';
 import { formatDateToSpanish, formatDisplayEndTime } from '@/utils/dateUtils';
 import UserAvatar from '@/components/common/UserAvatar';
 import Spinner2 from '@/components/ui/Spinner2';
+import { useRouter } from 'next/navigation'; // Añadir esto
 
 // Reemplazar la función getLocalISOString por una más específica
 const formatDateToYYYYMMDD = (date: Date): string => {
@@ -54,6 +55,15 @@ export default function AvailableMatchesPage() {
     const [reservations, setReservations] = useState<Reservation[]>([]);
     const [loading, setLoading] = useState(true);
     const { session } = useAuth();
+    const router = useRouter(); // Añadir esto
+
+    useEffect(() => {
+        if (!session) {
+            router.push('/login');
+            return;
+        }
+        fetchReservations();
+    }, [session, router]); // Añadir router a las dependencias
 
     const fetchReservations = async () => {
         try {
@@ -250,9 +260,8 @@ export default function AvailableMatchesPage() {
         }
     };
 
-    useEffect(() => {
-        fetchReservations();
-    }, []);
+    // Añadir protección antes del return
+    if (!session) return null;
 
     return (
         <div className="max-w-2xl mx-auto p-4">
