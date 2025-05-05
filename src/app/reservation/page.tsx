@@ -6,7 +6,8 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
 import DatePicker from '@/components/reservation/DatePicker';
 import TimeSlotPicker from '@/components/reservation/TimeSlotPicker';
-import { addMinutes, addDays, getLocalISOString } from '@/utils/dateUtils';
+import { addMinutes, addDays } from '@/utils/dateUtils';
+import { PostgrestError } from '@supabase/supabase-js';
 
 export default function ReservationPage() {
     const router = useRouter();
@@ -68,9 +69,13 @@ export default function ReservationPage() {
 
             toast.success('Reserva realizada con éxito');
             router.push('/my-reservations');
-        } catch (error: any) {
-            console.error('Error:', error.message);
-            toast.error('Error al realizar la reserva');
+        } catch (error) {
+            console.error('Error:', error);
+            if (error instanceof PostgrestError) {
+                toast.error(`Error al realizar la reserva: ${error.message}`);
+            } else {
+                toast.error('Error al realizar la reserva');
+            }
         } finally {
             setLoading(false);
         }
