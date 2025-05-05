@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Spinner from './Spinner';
+import Image from 'next/image'; // Añadimos la importación de Image
 
 interface UserData {
     nombre?: string;
@@ -52,12 +53,14 @@ export default function Avatar() {
                 </div>
             ) : userData?.avatar_url && !imageError ? (
                 <div className="relative w-full h-full">
-                    <img 
+                    <Image 
                         src={userData.avatar_url}
                         alt="Avatar"
-                        className="h-full w-full object-cover"
+                        fill
+                        className="object-cover"
                         onError={() => setImageError(true)}
                         onLoad={() => setIsLoading(false)}
+                        sizes="40px"
                     />
                 </div>
             ) : (
