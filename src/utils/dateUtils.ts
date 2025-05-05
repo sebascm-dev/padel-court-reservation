@@ -1,4 +1,4 @@
-import { addDays as dateFnsAddDays } from 'date-fns';
+import { addDays } from 'date-fns';
 
 export const addMinutes = (time: string, minutes: number): string => {
     const [hours, mins] = time.split(':').map(Number);
@@ -31,12 +31,6 @@ export function addMinutesToDate(date: Date, minutes: number): Date {
     return result;
 }
 
-export function addDays(date: Date, days: number): Date {
-    const result = new Date(date);
-    result.setDate(result.getDate() + days);
-    return result;
-}
-
 export function getLocalISOString(date: Date): string {
     return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString();
 }
@@ -54,7 +48,7 @@ export function isValidDateFormat(dateString: string): boolean {
            date.getDate() === day;
 }
 
-export function formatDateToSpanish(date: string, startTime: string, endTime: string): string {
+export function formatDateToSpanish(date: string): string {
     if (!isValidDateFormat(date)) {
         console.error('Formato de fecha inválido:', date);
         return 'Fecha inválida';
@@ -77,6 +71,9 @@ export function formatDateToSpanish(date: string, startTime: string, endTime: st
     
     return `${capitalizedWeekDay}, ${dayNumber} de ${capitalizedMonth}`;
 }
+
+// Eliminamos nuestra implementación de addDays ya que usaremos la de date-fns
+export { addDays };
 
 export function formatDateForDB(date: Date): string {
     const year = date.getFullYear();
