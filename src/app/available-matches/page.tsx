@@ -59,6 +59,15 @@ export default function AvailableMatchesPage() {
 
     const fetchReservations = async () => {
         try {
+            // Obtener fecha y hora actual
+            const now = new Date();
+            const currentTime = now.toLocaleTimeString('es-ES', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+            const today = formatDateToYYYYMMDD(now);
+
             const { data: reservationsData, error: reservationsError } = await supabase
                 .from('reservations')
                 .select(`
@@ -77,13 +86,27 @@ export default function AvailableMatchesPage() {
             if (reservationsError) throw reservationsError;
 
             if (reservationsData) {
-                // Asegurar que las fechas estén en formato correcto
-                const formattedReservations = reservationsData.map(reservation => ({
-                    ...reservation,
-                    date: isValidDateFormat(reservation.date) 
-                        ? reservation.date 
-                        : formatDateToYYYYMMDD(new Date(reservation.date))
-                }));
+                // Filtrar reservas pasadas y formatear fechas
+                const formattedReservations = reservationsData
+                    .filter(reservation => {
+                        const reservationDate = isValidDateFormat(reservation.date) 
+                            ? reservation.date 
+                            : formatDateToYYYYMMDD(new Date(reservation.date));
+                        
+                        // Si la fecha es futura, mantener la reserva
+                        if (reservationDate > today) return true;
+                        // Si es hoy, verificar la hora
+                        if (reservationDate === today) {
+                            return reservation.end_time > currentTime;
+                        }
+                        return false;
+                    })
+                    .map(reservation => ({
+                        ...reservation,
+                        date: isValidDateFormat(reservation.date) 
+                            ? reservation.date 
+                            : formatDateToYYYYMMDD(new Date(reservation.date))
+                    }));
 
                 // Obtener los jugadores para cada reserva
                 const reservationsWithPlayers = await Promise.all(
@@ -116,7 +139,7 @@ export default function AvailableMatchesPage() {
                     })
                 );
 
-                console.log('Reservas formateadas:', reservationsWithPlayers);
+                console.log('Reservas filtradas y formateadas:', reservationsWithPlayers);
                 setReservations(reservationsWithPlayers);
             }
         } catch (error) {
