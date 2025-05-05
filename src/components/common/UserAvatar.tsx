@@ -1,4 +1,5 @@
 "use client"
+import Image from 'next/image';
 
 interface UserAvatarProps {
     nombre: string;
@@ -23,11 +24,15 @@ const UserAvatar = ({ nombre, apellidos, avatarUrl, size = 'md', className = '' 
 
     if (avatarUrl) {
         return (
-            <img
-                src={avatarUrl}
-                alt={`${nombre} ${apellidos}`}
-                className={`rounded-full object-cover ${sizeClasses[size]} ${className}`}
-            />
+            <div className={`relative overflow-hidden rounded-full ${sizeClasses[size]} ${className}`}>
+                <Image
+                    src={avatarUrl}
+                    alt={`${nombre} ${apellidos}`}
+                    fill
+                    className="object-cover"
+                    sizes={`(max-width: 768px) ${sizeClasses[size].split(' ')[0]}, ${sizeClasses[size].split(' ')[0]}`}
+                />
+            </div>
         );
     }
 
