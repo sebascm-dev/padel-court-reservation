@@ -5,6 +5,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { format, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { formatDateForDB } from '@/utils/dateUtils';
+import Spinner2 from '@/components/ui/Spinner2';
 
 interface MonthlyReservations {
   [key: string]: number;
@@ -139,7 +140,16 @@ const ReservationsCount = () => {
     }));
   };
 
-  if (loading) return <div>Cargando...</div>;
+  if (loading) {
+    return (
+      <div>
+        <h2 className="text-lg font-semibold mb-2">Pistas Reservadas</h2>
+        <div className="flex justify-center items-center h-56">
+          <Spinner2 className="w-8 h-8" />
+        </div>
+      </div>
+    );
+  }
 
   const chartData = formatDataForChart(monthlyReservations);
 
