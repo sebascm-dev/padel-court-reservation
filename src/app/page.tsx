@@ -64,7 +64,7 @@ export default function DashboardPage() {
                 </div>
             </div>
             
-            <div className="flex flex-col gap-5 mb-16">
+            <div className="flex flex-col gap-5 mb-24">
                 <div>
                     <NextReservation />
                 </div>
@@ -73,11 +73,11 @@ export default function DashboardPage() {
                     <DashboardActions />
                 </div>
                 
-                <div className='mt-4'>
+                <div className='mt-8'>
                     <UpcomingMatches />
                 </div>
 
-                <div className='mt-4'>
+                <div className='mt-8'>
                     <ReservationsChart />
                 </div>
             </div>
