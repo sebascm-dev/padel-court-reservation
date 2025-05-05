@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { formatDisplayEndTime, formatDateForDB } from '@/utils/dateUtils';
 import confetti from 'canvas-confetti';
+import Link from 'next/link';
 
 interface Player {
   id: string;
@@ -211,10 +212,34 @@ export default function NextReservation() {
 
   if (!nextReservation) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-4">
-        <h2 className="text-lg font-semibold mb-2">Próxima Reserva</h2>
-        <p className="text-gray-500 text-sm">No tienes reservas próximas</p>
-      </div>
+        <div>
+            <h2 className="text-lg font-semibold mb-2">Próxima Reserva</h2>
+            <div>
+                <div className="flex flex-col items-center justify-center text-center">
+                    <div className="mb-2">
+                        <svg 
+                            className="w-12 h-12 text-gray-300" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            stroke="currentColor"
+                        >
+                            <path 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                                strokeWidth={2} 
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" 
+                            />
+                        </svg>
+                    </div>
+                    <h3 className="text-lg text-gray-600">
+                        No tienes reservas activas
+                    </h3>
+                    <p className="text-gray-500 text-sm">
+                        ¡Reserva una pista y comienza a jugar!
+                    </p>
+                </div>
+            </div>
+        </div>
     );
   }
 

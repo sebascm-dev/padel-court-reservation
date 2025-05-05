@@ -206,9 +206,34 @@ export default function UpcomingMatches() {
 
     if (matches.length === 0) {
         return (
-            <div className="bg-white rounded-lg shadow-md p-4">
+            <div>
                 <h2 className="text-lg font-semibold mb-2">Partidos Disponibles</h2>
-                <p className="text-gray-500 text-sm">No hay partidos disponibles para hoy o mañana</p>
+                <div className="flex flex-col items-center justify-center text-center">
+                    <div className="mb-2">
+                        <div className="text-gray-400">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-12 w-12 mx-auto"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={1.5}
+                                    d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 className="text-lg text-gray-600">
+                        No hay partidos disponibles
+                    </h3>
+                    <p className="text-gray-400 text-sm">
+                        ¡Crea un partido nuevo y encuentra compañeros para jugar!
+                    </p>
+                </div>
             </div>
         );
     }
