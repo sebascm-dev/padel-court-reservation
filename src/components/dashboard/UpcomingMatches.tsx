@@ -55,7 +55,6 @@ const calculateAverageLevel = (match: Match) => {
 export default function UpcomingMatches() {
     const [matches, setMatches] = useState<Match[]>([]);
     const [loading, setLoading] = useState(true);
-    const [joiningMatch, setJoiningMatch] = useState<string | null>(null);
     const { session } = useAuth();
 
     const fetchUpcomingMatches = async () => {
@@ -182,8 +181,6 @@ export default function UpcomingMatches() {
         } catch (error) {
             console.error('Error al unirse al partido:', error);
             toast.error('Error al unirse al partido');
-        } finally {
-            setJoiningMatch(null);
         }
     };
 
@@ -276,7 +273,7 @@ export default function UpcomingMatches() {
                     >
                         <div>
                             <div className="text-gray-900 font-medium mb-1">
-                                {formatDateToSpanish(match.date, match.start_time, match.end_time)}
+                                {formatDateToSpanish(match.date)}
                             </div>
                             <div className="text-sm text-gray-500">
                                 Nivel: {calculateAverageLevel(match)} · {match.start_time.slice(0, 5)}
@@ -299,11 +296,6 @@ export default function UpcomingMatches() {
                                         return (
                                             <button
                                                 key={`slot-${i}`}
-                                                onClick={() => {
-                                                    if (!player && confirm('¿Quieres unirte a este partido?')) {
-                                                        handleJoinMatch(match.id);
-                                                    }
-                                                }}
                                                 className={`w-8 h-8 rounded-full border-2 border-white 
                                                           flex items-center justify-center transition-colors overflow-hidden
                                                           ${player ?
