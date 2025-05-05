@@ -142,55 +142,67 @@ export default function NextReservation() {
 
   return (
     <div>
-      <h2 className="text-sm font-semibold">Tu Próxima Reserva</h2>
+      <h2 className="text-xl font-bold mb-2">Tu Próxima Reserva</h2>
 
-      <div className="relative bg-gray-50 rounded-lg p-4 h-36 border border-gray-200">
-        {/* Pill estado */}
-        <div className="absolute top-4 left-4">
-          <span
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
-              players.length < 4 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}
+      {/* Reducimos la altura y el padding */}
+      <div className="relative bg-white rounded-xl p-6 border border-gray-200 shadow-md h-[160px]">
+        {/* Pill estado - ajustamos posición */}
+        <div className="absolute top-3 left-4">
+          <span className={`px-3 py-1 rounded-full text-sm font-medium border
+            ${players.length < 4 
+              ? 'bg-green-50 text-green-700 border-green-200' 
+              : 'bg-red-50 text-red-700 border-red-200'}`}
           >
             {players.length < 4 ? 'Abierta' : 'Completa'}
           </span>
         </div>
 
-        {/* Círculos de jugadores */}
-        <div className="absolute top-4 right-4 flex space-x-2">
-          {slots.map(i => {
-            const p = players[i];
-            return p ? (
-              <img
-                key={i}
-                src={p.avatar_url || ''}
-                alt={p.nombre}
-                className="w-8 h-8 rounded-full object-cover border-2 border-white"
-              />
-            ) : (
-              <div
-                key={i}
-                className="w-8 h-8 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center"
-              >
-                <span className="text-gray-400 text-xs">+</span>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Fecha centrada */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="px-4 py-2 mt-2 bg-green-100 text-green-800 text-base font-medium rounded-md">
-            {displayDate}
+        {/* Fecha - ajustamos posición y tamaño */}
+        <div className="absolute top-3 right-4">
+          <span className="text-base font-medium text-gray-700">
+            {format(formattedDate, "EEEE, d 'de' MMMM", { locale: es })}
           </span>
         </div>
 
-        {/* Footer: hora y nivel */}
-        <div className="absolute bottom-4 left-4 text-gray-600 font-medium">
-          {start_time.slice(0, 5)} a {formatDisplayEndTime(end_time)}
+        {/* Círculos - ajustamos para que sean perfectamente redondos */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mt-1">
+          <div className="flex gap-8"> {/* Reducimos el gap de 6 a 4 */}
+            {slots.map(i => {
+              const p = players[i];
+              return p ? (
+                <div key={i} className="text-center flex flex-col items-center justify-center">
+                  <div className="aspect-square w-12"> {/* Reducimos w-14 a w-12 */}
+                    <img
+                      src={p.avatar_url || ''}
+                      alt={p.nombre}
+                      className="size-12 rounded-full object-cover border-2 border-green-100 shadow-sm"
+                    />
+                  </div>
+                  <span className="text-xs text-gray-500 mt-1 block">{p.nombre}</span> {/* Reducimos mt-1.5 a mt-1 */}
+                </div>
+              ) : (
+                <div key={i} className="text-center">
+                  <div className="aspect-square w-12"> {/* Reducimos w-14 a w-12 */}
+                    <div className="size-12 rounded-full bg-gray-50 border-2 border-gray-100 
+                                flex items-center justify-center shadow-sm">
+                      <span className="text-gray-400 text-sm">+</span>
+                    </div>
+                  </div>
+                  <span className="text-xs text-gray-400 mt-1 block">Libre</span> {/* Reducimos mt-1.5 a mt-1 */}
+                </div>
+              );
+            })}
+          </div>
         </div>
-        <div className="absolute bottom-4 right-4 text-gray-600 font-medium">
-          Nivel: {avgLevel}
+
+        {/* Footer - ajustamos posición */}
+        <div className="absolute bottom-3 left-0 right-0 flex justify-between px-4">
+          <span className="text-gray-600 font-medium">
+            {start_time.slice(0, 5)} a {formatDisplayEndTime(end_time)}
+          </span>
+          <span className="text-gray-600 font-medium">
+            Nivel: {avgLevel}
+          </span>
         </div>
       </div>
     </div>
