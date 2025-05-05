@@ -231,7 +231,7 @@ export default function NextReservation() {
             <div className="flex flex-col items-center">
               <div className="relative mb-2">
                 {/* Avatar con overlay */}
-                <div className="size-16 rounded-full overflow-hidden relative">
+                <div className="size-18 rounded-full overflow-hidden relative">
                   <img
                     src={nextReservation.creator?.avatar_url || ''}
                     alt={nextReservation.creator?.nombre}
@@ -242,7 +242,7 @@ export default function NextReservation() {
                 {/* Candado superpuesto */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <svg 
-                    className="w-8 h-8 text-purple-300/80 drop-shadow-md" 
+                    className="w-8 h-8 text-gray-300/80 drop-shadow-md" 
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
