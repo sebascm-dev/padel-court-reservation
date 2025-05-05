@@ -1,5 +1,6 @@
 "use client"
 import { useEffect, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { toast } from 'react-hot-toast';
@@ -30,38 +31,34 @@ interface Reservation {
 }
 
 export default function MyReservationsPage() {
+    const router = useRouter();
     const { session } = useAuth();
     const [reservations, setReservations] = useState<Reservation[]>([]);
     const [loading, setLoading] = useState(true);
 
     const ensureCorrectDateFormat = (dateString: string): string => {
-        // Verificar si ya está en formato AAAA-MM-DD
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
         if (dateRegex.test(dateString)) {
-            // Verificar que el mes sea válido (1-12)
-            const [ month ] = dateString.split('-').map(Number);
+            const [month] = dateString.split('-').map(Number);
             if (month <= 12) {
                 return dateString;
             }
         }
 
-        // Si no está en formato correcto, convertir de AAAA-DD-MM a AAAA-MM-DD
         const [year, day, month] = dateString.split('-');
         return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     };
 
     const fetchUserReservations = useCallback(async () => {
         try {
-            // Obtener fecha y hora actual
             const now = new Date();
             const currentTime = now.toLocaleTimeString('es-ES', { 
                 hour: '2-digit', 
                 minute: '2-digit',
                 hour12: false 
             });
-            const today = now.toISOString().split('T')[0]; // AAAA-MM-DD
+            const today = now.toISOString().split('T')[0];
 
-            // 1. Obtener las reservas creadas por el usuario
             const { data: ownedReservations, error: ownedError } = await supabase
                 .from('reservations')
                 .select('*')
@@ -69,14 +66,11 @@ export default function MyReservationsPage() {
                 .order('date', { ascending: true })
                 .order('start_time', { ascending: true });
 
-            // Asegurar formato correcto de fechas y filtrar reservas pasadas
             let filteredOwnedReservations = [];
             if (ownedReservations) {
                 filteredOwnedReservations = ownedReservations.filter(reservation => {
                     const reservationDate = ensureCorrectDateFormat(reservation.date);
-                    // Si la fecha es futura, mantener la reserva
                     if (reservationDate > today) return true;
-                    // Si es hoy, verificar la hora
                     if (reservationDate === today) {
                         return reservation.end_time > currentTime;
                     }
@@ -86,7 +80,6 @@ export default function MyReservationsPage() {
 
             if (ownedError) throw ownedError;
 
-            // 2. Obtener las reservas donde el usuario es un jugador
             const { data: joinedReservationsIds, error: joinedError } = await supabase
                 .from('reservation_players')
                 .select('reservation_id')
@@ -94,7 +87,6 @@ export default function MyReservationsPage() {
 
             if (joinedError) throw joinedError;
 
-            // 3. Obtener los detalles de las reservas donde el usuario es jugador
             const joinedIds = joinedReservationsIds?.map(r => r.reservation_id) || [];
             const { data: joinedReservations, error: joinedDetailsError } = await supabase
                 .from('reservations')
@@ -103,7 +95,6 @@ export default function MyReservationsPage() {
                 .order('date', { ascending: true })
                 .order('start_time', { ascending: true });
 
-            // Filtrar reservas pasadas de las unidas
             let filteredJoinedReservations = [];
             if (joinedReservations) {
                 filteredJoinedReservations = joinedReservations.filter(reservation => {
@@ -118,7 +109,6 @@ export default function MyReservationsPage() {
 
             if (joinedDetailsError) throw joinedDetailsError;
 
-            // Combinar todas las reservas filtradas
             const allReservations = Array.from(
                 new Map(
                     [...filteredOwnedReservations, ...filteredJoinedReservations]
@@ -126,7 +116,6 @@ export default function MyReservationsPage() {
                 ).values()
             );
 
-            // 5. Obtener los jugadores para cada reserva
             const reservationsWithPlayers = await Promise.all(
                 allReservations.map(async (reservation) => {
                     const { data: players, error: playersError } = await supabase
@@ -171,10 +160,12 @@ export default function MyReservationsPage() {
     }, [session]);
 
     useEffect(() => {
-        if (session) {
-            fetchUserReservations();
+        if (!session) {
+            router.push('/login');
+            return;
         }
-    }, [session, fetchUserReservations]);
+        fetchUserReservations();
+    }, [session, router, fetchUserReservations]);
 
     const handleDeleteReservation = async (reservationId: string) => {
         if (!confirm('¿Estás seguro de que quieres cancelar esta reserva?')) {
@@ -203,6 +194,8 @@ export default function MyReservationsPage() {
             toast.error('Error al cancelar la reserva');
         }
     };
+
+    if (!session) return null;
 
     return (
         <div className="max-w-4xl mx-auto p-4">

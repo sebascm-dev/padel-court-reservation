@@ -41,8 +41,8 @@ export const config = {
         '/dashboard/:path*',    // todas las rutas que empiecen con /dashboard
         '/profile',            // ruta de perfil
         '/reservation',
-        'my-reservations',
-        'available-matches',
+        '/my-reservations',
+        '/available-matches',
         '/login',             // ruta de login
         '/register',          // ruta de registro
     ]
