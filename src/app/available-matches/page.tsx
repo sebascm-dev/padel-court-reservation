@@ -3,8 +3,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { toast } from 'react-hot-toast';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { formatDateToSpanish, formatDisplayEndTime } from '@/utils/dateUtils';
 import UserAvatar from '@/components/common/UserAvatar';
 import Spinner2 from '@/components/ui/Spinner2';
@@ -22,7 +20,7 @@ const isValidDateFormat = (dateString: string): boolean => {
     const regex = /^\d{4}-\d{2}-\d{2}$/;
     if (!regex.test(dateString)) return false;
     
-    const [year, month, day] = dateString.split('-').map(Number);
+    const [month, day] = dateString.split('-').map(Number);
     return month <= 12 && day <= 31;
 };
 
@@ -310,8 +308,6 @@ export default function AvailableMatchesPage() {
                                             isValidDateFormat(reservation.date) 
                                                 ? reservation.date 
                                                 : formatDateToYYYYMMDD(new Date(reservation.date)),
-                                            reservation.start_time,
-                                            reservation.end_time
                                         )}
                                     </span>
                                 </h3>
