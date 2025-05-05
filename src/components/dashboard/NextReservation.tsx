@@ -222,7 +222,7 @@ export default function NextReservation() {
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-2">Tu Próxima Reserva</h2>
+      <h2 className="text-xl font-bold mb-2">Próxima Reserva</h2>
 
       <div className={`relative bg-white rounded-xl p-6 border border-gray-200 shadow-md h-[160px]
         ${nextReservation.is_private ? 'bg-gradient-to-br from-purple-50 to-white' : ''}`}>
